@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -60,13 +61,28 @@
   <!--suppress CssInvalidPropertyValue -->
   <style media="screen" type="text/css">
     html, body {
-      font-size: ${body_font_size}px !important;
-      line-height: ${body_line_height}px !important;
+      font-family: ${StyleManager.bodyFontSize};
+      color: ${StyleManager.bodyColor};
+      line-height: ${StyleManager.bodyLineHeight};
+      font-size: ${StyleManager.bodyFontSize}px;
+      line-height: ${StyleManager.bodyLineHeight}px;
+    }
+
+    code {
+      font-family: ${StyleManager.codeFont}
     }
 
     pre code {
-      font-size: ${code_font_size}px !important;
-      line-height: ${code_line_height}px !important;
+      font-size: ${StyleManager.codeFontSize}px !important;
+      line-height: ${StyleManager.codeLineHeight}px !important;
+    }
+
+    .example {
+      background-color: ${StyleManager.exampleBackground};
+    }
+
+    a {
+      color: ${StyleManager.linkColor};
     }
 
     .wrapper {
