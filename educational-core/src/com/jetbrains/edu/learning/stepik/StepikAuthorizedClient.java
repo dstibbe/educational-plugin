@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import com.jetbrains.edu.learning.EduSettings;
-import com.jetbrains.edu.learning.stepik.alt.HyperskillConnector;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -136,9 +135,7 @@ public class StepikAuthorizedClient {
       return null;
     }
 
-    final StepicUser user = login(tokenInfo);
-    HyperskillConnector.INSTANCE.login(user);
-    return user;
+    return login(tokenInfo);
   }
 
   public static StepicUser login(@NotNull StepikWrappers.TokenInfo tokenInfo) {
