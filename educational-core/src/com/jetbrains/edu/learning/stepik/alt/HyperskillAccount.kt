@@ -1,6 +1,6 @@
 package com.jetbrains.edu.learning.stepik.alt
 
-import java.util.*
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 class HyperskillAccount {
   var tokenInfo: TokenInfo? = null
@@ -9,25 +9,14 @@ class HyperskillAccount {
   // used for deserialization
   private constructor() {}
 
-  constructor(userInfo: HyperskillUserInfo, tokens: TokenInfo) {
-    this.userInfo = userInfo
-    tokenInfo = tokens
+  constructor(tokenInfo: TokenInfo) {
+    this.tokenInfo = tokenInfo
   }
 
-  fun updateTokens(newTokens: TokenInfo) {
-    tokenInfo = newTokens
-  }
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other == null || javaClass != other.javaClass) return false
-    val account = other as HyperskillAccount?
-    return userInfo == account!!.userInfo
-  }
-
-  override fun hashCode(): Int {
-    return Objects.hash(userInfo)
+  fun updateTokens(tokenInfo: TokenInfo) {
+    this.tokenInfo = tokenInfo
   }
 }
 
-data class HyperskillUserInfo(var id: Int = -1, var email: String = "")
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class HyperskillUserInfo(var id: Int = -1, var email: String = "", var fullname: String = "")

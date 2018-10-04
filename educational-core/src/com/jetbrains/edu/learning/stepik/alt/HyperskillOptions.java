@@ -96,10 +96,11 @@ public class HyperskillOptions implements OptionsProvider {
     }
     else {
       HyperskillUserInfo info = myCurrentAccount.getUserInfo();
-      myLoginLabel.setText("You're logged in as " + info.getEmail());
-      myLoginLink.setText("Log out");
-
-      myLoginListener = createLogoutListener();
+      if (info != null) {
+        myLoginLabel.setText("You're logged in as " + info.getFullname());
+        myLoginLink.setText("Log out");
+        myLoginListener = createLogoutListener();
+      }
     }
 
     myLoginLink.addHyperlinkListener(myLoginListener);
