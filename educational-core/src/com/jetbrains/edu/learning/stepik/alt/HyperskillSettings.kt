@@ -10,16 +10,13 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 class HyperskillSettings : PersistentStateComponent<HyperskillSettings> {
   var account: HyperskillAccount? = null
 
-  override fun getState(): HyperskillSettings? {
-    return this
-  }
+  override fun getState(): HyperskillSettings? = this
 
   override fun loadState(settings: HyperskillSettings) {
     XmlSerializerUtil.copyBean(settings, this)
   }
 
   companion object {
-
     val instance: HyperskillSettings
       get() = ServiceManager.getService(HyperskillSettings::class.java)
   }

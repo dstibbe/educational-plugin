@@ -6,8 +6,7 @@ class HyperskillAccount {
   var tokenInfo: TokenInfo? = null
   var userInfo: HyperskillUserInfo? = null
 
-  @Suppress("unused")
-  private constructor() // used for deserialization
+  @Suppress("unused") private constructor() // used for deserialization
 
   constructor(tokenInfo: TokenInfo) {
     this.tokenInfo = tokenInfo
