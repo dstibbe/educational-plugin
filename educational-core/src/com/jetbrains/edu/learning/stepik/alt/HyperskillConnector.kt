@@ -18,7 +18,7 @@ object HyperskillConnector {
 
   var clientId = "jcboczaSZYHmmCewusCNrE172yHkOONV7JY1ECh4"
   private val authorizationCodeUrl = "https://hyperskill.org/oauth2/authorize/?" +
-                                     "client_id=$clientId&redirect_uri=$redirectUri&response_type=code"
+                                     "client_id=$clientId&redirect_uri=$redirectUri&grant_type=code&scope=read+write&response_type=code"
 
   private val service: HyperskillService
     get() {
