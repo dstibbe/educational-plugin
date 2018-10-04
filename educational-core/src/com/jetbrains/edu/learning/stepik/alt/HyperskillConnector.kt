@@ -2,7 +2,6 @@ package com.jetbrains.edu.learning.stepik.alt
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.messages.Topic
 import okhttp3.OkHttpClient
 import org.jetbrains.ide.BuiltInServerManager

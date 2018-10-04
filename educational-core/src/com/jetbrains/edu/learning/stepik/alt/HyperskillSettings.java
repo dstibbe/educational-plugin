@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 @State(name = "HyperskillSettings", storages = @Storage("other.xml"))
 public class HyperskillSettings implements PersistentStateComponent<HyperskillSettings> {
   @Nullable
-  private HyperskillAccount myHyperskillAccount;
+  private HyperskillAccount myAccount;
 
   @Nullable
   @Override
@@ -31,13 +31,11 @@ public class HyperskillSettings implements PersistentStateComponent<HyperskillSe
   }
 
   @Nullable
-  @Transient
   public HyperskillAccount getAccount() {
-    return myHyperskillAccount;
+    return myAccount;
   }
 
-  @Transient
   public void setAccount(@Nullable HyperskillAccount account) {
-    myHyperskillAccount = account;
+    myAccount = account;
   }
 }
