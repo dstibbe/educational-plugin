@@ -161,10 +161,11 @@ private fun addAllDescendants(parent: Parent, nodes: ArrayList<Node>) {
 }
 
 fun setButtonLaf(button: ButtonBase) {
-  val darcula = LafManager.getInstance().currentLookAndFeel is DarculaLookAndFeelInfo
-  val stylesheetPath = if (darcula) "/style/buttonsDarcula.css" else "/style/buttons.css"
   button.stylesheets.removeAll()
-  button.stylesheets.add(object {}.javaClass.getResource(stylesheetPath).toExternalForm())
+  button.stylesheets.add(object {}.javaClass.getResource("/style/buttonsBase.css").toExternalForm())
+  if (UIUtil.isUnderDarcula()) {
+    button.stylesheets.add(object {}.javaClass.getResource("/style/buttonsDarcula.css").toExternalForm())
+  }
 }
 
 private class StudyLafManagerListener(val scene: Scene) : LafManagerListener {
