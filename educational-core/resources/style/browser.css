@@ -20,4 +20,5 @@ h1 {
 
 pre {
     white-space: pre-wrap;
+    min-width: 250px;
 }
