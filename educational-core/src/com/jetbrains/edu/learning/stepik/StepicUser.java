@@ -20,50 +20,43 @@ public class StepicUser extends OauthAccount<StepicUserInfo> {
   @Transient
   public int getId() {
     StepicUserInfo info = getUserInfo();
-    return info != null ? info.getId() : -1;
+    return info.getId();
   }
 
   @Transient
   public void setId(int id) {
     StepicUserInfo info = getUserInfo();
-    if (info != null) {
-      info.setId(id);
-    }
+    info.setId(id);
   }
 
   @Transient
   public String getFirstName() {
     StepicUserInfo info = getUserInfo();
-    return info != null ? info.getFirstName() : "";
+    return info.getFirstName();
   }
 
   @Transient
   public void setFirstName(final String firstName) {
     StepicUserInfo info = getUserInfo();
-    if (info != null) {
-      info.setFirstName(firstName);
-    }
+    info.setFirstName(firstName);
   }
 
   @Transient
   public String getLastName() {
     StepicUserInfo info = getUserInfo();
-    return info != null ? info.getLastName() : "";
+    return info.getLastName();
   }
 
   @Transient
   public void setLastName(final String lastName) {
     StepicUserInfo info = getUserInfo();
-    if (info != null) {
-      info.setLastName(lastName);
-    }
+    info.setLastName(lastName);
   }
 
   @Transient
   @NotNull
   public String getName() {
     StepicUserInfo info = getUserInfo();
-    if (info == null) return "";
     return StringUtil.join(new String[]{info.getFirstName(), info.getLastName()}, " ");
   }
 
@@ -90,7 +83,7 @@ public class StepicUser extends OauthAccount<StepicUserInfo> {
   @Transient
   public boolean isGuest() {
     StepicUserInfo userInfo = getUserInfo();
-    return userInfo != null && userInfo.isGuest();
+    return userInfo.isGuest();
   }
 
   @Override
@@ -101,13 +94,12 @@ public class StepicUser extends OauthAccount<StepicUserInfo> {
     StepicUser user = (StepicUser)o;
     StepicUserInfo info = getUserInfo();
     StepicUserInfo otherInfo = user.getUserInfo();
-    if (info == null) return false;
     return info.equals(otherInfo);
   }
 
   @Override
   public int hashCode() {
     StepicUserInfo info = getUserInfo();
-    return info == null ? -1 : info.hashCode();
+    return info.hashCode();
   }
 }

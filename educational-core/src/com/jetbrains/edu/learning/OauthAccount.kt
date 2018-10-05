@@ -8,7 +8,7 @@ import org.jdom.Element
 
 abstract class OauthAccount<T : Any> {
   var tokenInfo: TokenInfo = TokenInfo()
-  var userInfo: T? = null
+  lateinit var userInfo: T
 
   constructor()
 
