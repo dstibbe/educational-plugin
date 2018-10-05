@@ -11,7 +11,6 @@ import org.jetbrains.annotations.PropertyKey
 import java.util.*
 
 
-
 class StyleManager {
   private val lafPrefix = if (UIUtil.isUnderDarcula()) "darcula" else "light"
   private val typographyManager = TypographyManager()
@@ -65,7 +64,8 @@ private object TaskDescriptionBundle {
     return CommonBundle.message(BUNDLE, key, *params)
   }
 
-  fun getFloatParameter(@PropertyKey(resourceBundle = BUNDLE_NAME) key: String) = TaskDescriptionBundle.message(if (SystemInfo.isMac) "mac.$key" else key).toFloat()
+  fun getFloatParameter(@PropertyKey(resourceBundle = BUNDLE_NAME) key: String) = TaskDescriptionBundle.message(
+    if (SystemInfo.isMac) "mac.$key" else key).toFloat()
 
   fun getOsDependentParameter(key: String) = TaskDescriptionBundle.message(
     parameterNameWithOSPrefix(key))
