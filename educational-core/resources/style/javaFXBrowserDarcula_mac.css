@@ -2,6 +2,10 @@
 background-color: #3c3f41;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin-left: 0;
     margin-right: 10px;

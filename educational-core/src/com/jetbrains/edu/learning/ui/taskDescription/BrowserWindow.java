@@ -172,7 +172,7 @@ public class BrowserWindow {
       if (result instanceof Integer) {
         Integer height = (Integer)result;
         ApplicationManager.getApplication().invokeLater(() -> {
-          componentToAdjust.setPreferredSize(new Dimension(componentToAdjust.getPreferredSize().width, JBUI.scale((height + 80))));
+          componentToAdjust.setPreferredSize(new Dimension(componentToAdjust.getPreferredSize().width, JBUI.scale((height + 60))));
           componentToAdjust.revalidate();
           componentToAdjust.repaint();
           componentToAdjust.setVisible(true);
@@ -192,6 +192,7 @@ public class BrowserWindow {
   private static String doProcessContent(@NotNull String content, @NotNull VirtualFile taskDir, Project project) {
     Course course = StudyTaskManager.getInstance(project).getCourse();
     if (course == null) {
+
       return content;
     }
 
