@@ -26,15 +26,12 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
         val playgroundDir = VfsUtil.createDirectoryIfMissing(baseDir, PROJECT_PLAYGROUND)
         VfsUtil.createDirectoryIfMissing(playgroundDir, EduNames.SRC)
 
-        val template = FileTemplateManager.getInstance(project).getInternalTemplate(
-          PLAYGROUND_SETTINGS_GRADLE)
-        GeneratorUtils.createChildFile(playgroundDir, GradleConstants.SETTINGS_FILE_NAME,
-                                       template.text)
+        val template = FileTemplateManager.getInstance(project).getInternalTemplate(PLAYGROUND_SETTINGS_GRADLE)
+        GeneratorUtils.createChildFile(playgroundDir, GradleConstants.SETTINGS_FILE_NAME, template.text)
 
         val templateBuildGradleText = EduGradleUtils.getInternalTemplateText(
           PLAYGROUND_BUILD_GRADLE, mapOf("GRADLE_VERSION" to EduGradleUtils.gradleVersion())) ?: return@ThrowableComputable
-        GeneratorUtils.createChildFile(playgroundDir, GradleConstants.DEFAULT_SCRIPT_NAME,
-                                       templateBuildGradleText)
+        GeneratorUtils.createChildFile(playgroundDir, GradleConstants.DEFAULT_SCRIPT_NAME, templateBuildGradleText)
 
       })
   }
