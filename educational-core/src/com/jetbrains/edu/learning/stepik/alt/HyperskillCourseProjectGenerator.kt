@@ -21,7 +21,6 @@ class HyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
     catch (e: IOException) {
       LOG.warn("Failed to create project playground")
     }
-
   }
 
   override fun beforeProjectGenerated(): Boolean {
