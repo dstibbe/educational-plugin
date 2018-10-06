@@ -5,9 +5,11 @@ import com.intellij.lang.Language;
 import com.jetbrains.edu.learning.EduNames;
 import org.jetbrains.annotations.NotNull;
 
+import static com.jetbrains.edu.java.learning.stepik.alt.JHyperskillNamesKt.JHYPERSKILL_LANGUAGE;
+
 public class JHyperskill extends Language implements DependentLanguage {
   protected JHyperskill() {
-    super("Hyperskill-JAVA");
+    super(JHYPERSKILL_LANGUAGE);
   }
 
   @NotNull
