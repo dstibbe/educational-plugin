@@ -128,7 +128,6 @@ object HyperskillConnector {
     })
   }
 
-  @FunctionalInterface
   private interface HyperskillLoggedIn {
     fun userLoggedIn()
   }
