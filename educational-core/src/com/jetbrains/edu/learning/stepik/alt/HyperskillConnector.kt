@@ -96,7 +96,8 @@ object HyperskillConnector {
                       section.name = topic.title
                       section.id = topic.id
                       if (topic.hasLessons) {
-                        val lessonsIds = service.lessons(topic.id).execute().body()?.lessons?.map { it.stepikId } ?: return@Callable section
+                        val lessonsIds = service.lessons(topic.id).execute().body()?.
+                          lessons?.asSequence()?.filter { it.type != "test" }?.map { it.stepikId }?.toList() ?: return@Callable section
                         val lessons = getLessons(lessonsIds.map { it -> it.toString() }, languageId)
                         section.addLessons(lessons)
                         return@Callable section
