@@ -9,8 +9,6 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
-import java.io.IOException
-import java.net.URISyntaxException
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -52,17 +50,8 @@ object HyperskillConnector {
     }
 
   fun doAuthorize(vararg postLoginActions: Runnable) {
-    try {
-      createAuthorizationListener(*postLoginActions)
-      BrowserUtil.browse(AUTHORISATION_CODE_URL)
-    }
-    catch (e: URISyntaxException) {
-      // IOException is thrown when there're no available ports, in some cases restarting can fix this
-      //TODO: handle exceptions
-    }
-    catch (e: IOException) {
-      //TODO:
-    }
+    createAuthorizationListener(*postLoginActions)
+    BrowserUtil.browse(AUTHORISATION_CODE_URL)
   }
 
   fun login(code: String): Boolean {
