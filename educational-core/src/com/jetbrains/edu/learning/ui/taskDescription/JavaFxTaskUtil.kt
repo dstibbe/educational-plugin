@@ -172,7 +172,7 @@ private class StudyLafManagerListener(val scene: Scene) : LafManagerListener {
   }
 }
 
-class TaskDescriptionHtml(private val myProject: Project, course: Course, val taskText: String) {
+class TaskDescriptionHtml(private val myProject: Project, course: Course, private val taskText: String) {
   private val SRC_ATTRIBUTE = "src"
   private val LOG = Logger.getInstance(this::class.java)
 
@@ -246,7 +246,7 @@ class TaskDescriptionHtml(private val myProject: Project, course: Course, val ta
 
   private fun highlightScript(): String {
     val loadText = loadText("/code-mirror/highlightCode.js.ft")
-    return loadText?.replace("\${default_mode}", decorator.defaultHighlightingMode) ?: "";
+    return loadText?.replace("\${default_mode}", decorator.defaultHighlightingMode) ?: ""
   }
 
   private fun loadText(filePath: String): String? {
