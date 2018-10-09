@@ -84,7 +84,7 @@ public class JavaFxToolWindow extends TaskDescriptionToolWindow {
 
   @Override
   protected void updateLaf(boolean isDarcula) {
-    myBrowserWindow.updateLaf(isDarcula);
+    myBrowserWindow.updateLaf();
   }
 
   @Override

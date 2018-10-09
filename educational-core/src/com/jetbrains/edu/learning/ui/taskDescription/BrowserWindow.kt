@@ -1,11 +1,9 @@
 package com.jetbrains.edu.learning.ui.taskDescription
 
 import com.intellij.ide.BrowserUtil
-import com.intellij.ide.ui.LafManager
-import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.SystemInfo
-import com.jetbrains.edu.learning.EduUtils
+import com.intellij.ui.ColorUtil
+import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.navigation.NavigationUtils
 import com.jetbrains.edu.learning.statistics.EduUsagesCollector
@@ -51,41 +49,19 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
       val scene = Scene(myPane)
       panel.scene = scene
       panel.isVisible = true
-      updateLaf(LafManager.getInstance().currentLookAndFeel is DarculaLookAndFeelInfo)
+      updateLaf()
     }
   }
 
-  fun updateLaf(isDarcula: Boolean) {
-    if (isDarcula) {
-      updateLafDarcula()
-    }
-    else {
-      updateIntellijAndGTKLaf()
-    }
-  }
-
-  private fun updateIntellijAndGTKLaf() {
+  fun updateLaf() {
     Platform.runLater {
-      val scrollBarStyleUrl = javaClass.getResource(
-        if (SystemInfo.isWindows) "/style/javaFXBrowserScrollBar_win.css" else "/style/javaFXBrowserScrollBar.css")
-      val engineStyleUrl = javaClass.getResource("/style/browser.css")
-      myEngine.userStyleSheetLocation = engineStyleUrl.toExternalForm()
+      val styleManager = StyleManager()
+      val baseStylesheet = styleManager.baseStylesheet
+      myEngine.userStyleSheetLocation = baseStylesheet
       panel.scene.stylesheets.clear()
-      panel.scene.stylesheets.addAll(engineStyleUrl.toExternalForm(), scrollBarStyleUrl.toExternalForm())
-      myEngine.reload()
-      EduUtils.getCurrentTask(myProject)
-    }
-  }
-
-  private fun updateLafDarcula() {
-    Platform.runLater {
-      val engineStyleUrl = javaClass.getResource("/style/browser.css")
-      val scrollBarStyleUrl = javaClass.getResource(
-        if (SystemInfo.isWindows) "/style/javaFXBrowserDarculaScrollBar_win.css" else "/style/javaFXBrowserDarculaScrollBar.css")
-      myEngine.userStyleSheetLocation = engineStyleUrl.toExternalForm()
-      panel.scene.stylesheets.clear()
-      panel.scene.stylesheets.addAll(engineStyleUrl.toExternalForm(), scrollBarStyleUrl.toExternalForm())
-      myPane.style = "-fx-background-color: #3c3f41"
+      panel.scene.stylesheets.add(baseStylesheet)
+      panel.scene.stylesheets.addAll(styleManager.scrollBarStylesheets)
+      myPane.style = "-fx-background-color: #${ColorUtil.toHex(UIUtil.getPanelBackground())};"
       myEngine.reload()
     }
   }

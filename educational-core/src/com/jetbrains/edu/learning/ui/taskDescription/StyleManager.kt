@@ -1,6 +1,7 @@
 package com.jetbrains.edu.learning.ui.taskDescription
 
 import com.intellij.CommonBundle
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.FontPreferences
 import com.intellij.openapi.util.SystemInfo
@@ -12,6 +13,8 @@ import java.util.*
 
 
 class StyleManager {
+  private val LOG = Logger.getInstance(this::class.java)
+
   private val lafPrefix = if (UIUtil.isUnderDarcula()) "darcula" else "light"
   private val typographyManager = TypographyManager()
 
@@ -27,8 +30,33 @@ class StyleManager {
   val linkColor = getCSSColor("$lafPrefix.link.color")
   val bodyBackground = getCSSColor("$lafPrefix.body.background")
 
+  val scrollBarStylesheets = getScrollBarStylesheetsUrls()
+  val baseStylesheet = resourceUrl("/style/browser.css")
+  val buttonStylesheets = listOfNotNull(baseStylesheet,
+                                        resourceUrl("/style/javafxButtons/buttonsBase.css"),
+                                        resourceUrl("/style/javafxButtons/buttonsDarcula.css").takeIf { UIUtil.isUnderDarcula() })
+
+  private fun getScrollBarStylesheetsUrls(): List<String> {
+    return listOf(resourceUrl("/style/scrollbars/base.css"),
+                  if (SystemInfo.isWindows) resourceUrl("/style/scrollbars/winShape.css")
+                  else resourceUrl("/style/scrollbars/macLinuxShape.css"),
+                  if (UIUtil.isUnderDarcula()) resourceUrl("/style/scrollbars/darcula.css")
+                  else resourceUrl("/style/scrollbars/light.css"))
+  }
+
   private fun getCSSColor(s: String): Color {
     return Color((TaskDescriptionBundle.message(s)))
+  }
+
+  private fun resourceUrl(name: String): String {
+    val resource = object{}.javaClass.getResource(name)?.toExternalForm()
+    return if (resource != null) {
+      resource
+    }
+    else {
+      LOG.warn("Cannot find resource: $name")
+      ""
+    }
   }
 }
 

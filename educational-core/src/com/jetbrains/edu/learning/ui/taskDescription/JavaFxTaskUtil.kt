@@ -98,20 +98,20 @@ private fun createLabel(text: String): Label {
 
 private fun createCheckbox(variant: String, index: Int, task: ChoiceTask): CheckBox {
   val checkBox = CheckBox(variant)
+  setUpButtonStyle(checkBox)
   checkBox.isMnemonicParsing = false
   checkBox.isSelected = task.selectedVariants.contains(index)
   checkBox.selectedProperty().addListener(createSelectionListener(task, index))
-  setUpButtonStyle(checkBox)
   return checkBox
 }
 
 private fun createRadioButton(variant: String, index: Int, toggleGroup: ToggleGroup, task: ChoiceTask): RadioButton {
   val isSelected = task.selectedVariants.contains(index)
   val radioButton = RadioButton(variant)
+  setUpButtonStyle(radioButton)
   radioButton.toggleGroup = toggleGroup
   radioButton.isSelected = isSelected
   radioButton.selectedProperty().addListener(createSelectionListener(task, index))
-  setUpButtonStyle(radioButton)
   return radioButton
 }
 
@@ -122,6 +122,7 @@ private fun getSceneBackground(): Color {
 }
 
 private fun setUpLabelStyle(node: Label) {
+  node.stylesheets.add(StyleManager().baseStylesheet)
   node.font = Font(StyleManager().bodyFont, getFontSize())
   val labelForeground = UIUtil.getLabelForeground()
   node.textFill = Color.rgb(labelForeground.red, labelForeground.green, labelForeground.blue)
@@ -162,10 +163,7 @@ private fun addAllDescendants(parent: Parent, nodes: ArrayList<Node>) {
 
 fun setButtonLaf(button: ButtonBase) {
   button.stylesheets.removeAll()
-  button.stylesheets.add(object {}.javaClass.getResource("/style/buttonsBase.css").toExternalForm())
-  if (UIUtil.isUnderDarcula()) {
-    button.stylesheets.add(object {}.javaClass.getResource("/style/buttonsDarcula.css").toExternalForm())
-  }
+  button.stylesheets.addAll(StyleManager().buttonStylesheets)
 }
 
 private class StudyLafManagerListener(val scene: Scene) : LafManagerListener {
