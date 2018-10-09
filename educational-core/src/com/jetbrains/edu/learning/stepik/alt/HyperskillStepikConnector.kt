@@ -1,17 +1,12 @@
 package com.jetbrains.edu.learning.stepik.alt
 
 import com.intellij.lang.Language
-import com.jetbrains.edu.learning.courseFormat.FeedbackLink
 import com.jetbrains.edu.learning.courseFormat.Lesson
 import com.jetbrains.edu.learning.courseFormat.TaskFile
 import com.jetbrains.edu.learning.courseFormat.tasks.EduTask
 import com.jetbrains.edu.learning.stepik.StepikConnector
 
-const val LINK_TEMPLATE = HYPERSKILL_URL + "learn/lesson/"
-
-fun getLesson(lessonId: Int,
-              language: Language,
-              stages: List<HyperskillStage>): Lesson? {
+fun getLesson(lessonId: Int, language: Language, stages: List<HyperskillStage>): Lesson? {
   val lesson = StepikConnector.getLesson(lessonId)
   val stepIds = lesson.steps.map { stepId -> stepId.toString() }.toTypedArray()
   val allStepSources = StepikConnector.getStepSources(stepIds, language.displayName)
@@ -23,7 +18,6 @@ fun getLesson(lessonId: Int,
     // TODO: extract as template
     eduTask.addTaskFile(TaskFile("src/Task.java", ""))
     eduTask.descriptionText = task.descriptionText
-    eduTask.feedbackLink = FeedbackLink(LINK_TEMPLATE + lesson.id)
     convertedTasks.add(eduTask)
   }
 
