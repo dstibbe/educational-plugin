@@ -182,8 +182,8 @@ class TaskDescriptionHtml(private val myProject: Project, course: Course, val ta
   private fun variables() = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
     "language_script" to decorator.languageScriptUrl,
-    "default_mode" to decorator.defaultHighlightingMode,
-    "content" to taskText
+    "content" to taskText,
+    "highlight_code" to highlightScript()
   )
 
   // update style/template.html.ft in case of modifying
@@ -203,11 +203,11 @@ class TaskDescriptionHtml(private val myProject: Project, course: Course, val ta
     "toggle_hint_script" to getResourcePath("/style/hint/toggleHint.js"),
     "mathjax_script" to getResourcePath("/style/mathjaxConfigure.js"),
     "stepik_link" to getResourcePath("/style/stepikLink.css"),
-    "highlight_code" to getResourcePath("/code-mirror/highlightCode.js")
+    "highlight_code" to getResourcePath("/code-mirror/highlightCode.js.ft")
   )
 
   fun html(): String {
-    val templateText = loadTemplateText()
+    val templateText = loadText("/style/template.html.ft")
     val templateWithVariables = StrSubstitutor(variables()).replace(templateText)
 
     val styledText = StrSubstitutor(resources()).replace(templateWithVariables)
@@ -244,10 +244,15 @@ class TaskDescriptionHtml(private val myProject: Project, course: Course, val ta
     }.toString()
   }
 
-  private fun loadTemplateText(): String? {
+  private fun highlightScript(): String {
+    val loadText = loadText("/code-mirror/highlightCode.js.ft")
+    return loadText?.replace("\${default_mode}", decorator.defaultHighlightingMode) ?: "";
+  }
+
+  private fun loadText(filePath: String): String? {
     var template: String? = null
     val classLoader = this::class.java.classLoader
-    val stream = classLoader.getResourceAsStream("/style/template.html.ft")
+    val stream = classLoader.getResourceAsStream(filePath)
     try {
       template = StreamUtil.readText(stream, "utf-8")
     }

@@ -27,6 +27,6 @@
     ${content}
 </div>
 
-<script type="text/javascript" src="${highlight_code}"/>
+<script>${highlight_code}</script>
 </body>
 </html>
