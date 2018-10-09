@@ -4,7 +4,6 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.DumbAwareAction
-import com.jetbrains.edu.coursecreator.actions.CCPluginToggleAction
 import com.jetbrains.edu.learning.CoursesProvider
 import com.jetbrains.edu.learning.EduNames
 import com.jetbrains.edu.learning.actions.ImportLocalCourseAction
@@ -51,6 +50,6 @@ class ImportHyperskillProject : ImportLocalCourseAction("Start Hyperskill Projec
 
   override fun update(e: AnActionEvent) {
     e.presentation.icon = AllIcons.ToolbarDecorator.Import
-    e.presentation.isEnabledAndVisible = CCPluginToggleAction.isCourseCreatorFeaturesEnabled
+    e.presentation.isEnabledAndVisible = true
   }
 }
