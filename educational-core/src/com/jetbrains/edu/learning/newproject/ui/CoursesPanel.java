@@ -255,6 +255,10 @@ public class CoursesPanel extends JPanel {
     return myCoursesList.getSelectedValue();
   }
 
+  public void setSelectedCourse(Course course) {
+    myCoursesList.setSelectedValue(course, true);
+  }
+
   private void createUIComponents() {
     myCoursePanel = new CoursePanel(false, true);
     mySearchField = new FilterComponent("Edu.NewCourse", 5, true) {
