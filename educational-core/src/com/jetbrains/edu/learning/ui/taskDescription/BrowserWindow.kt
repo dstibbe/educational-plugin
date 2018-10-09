@@ -41,7 +41,7 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
       Platform.setImplicitExit(false)
       myPane = StackPane()
       myWebComponent = WebView()
-      myWebComponent.setOnDragDetected { _ -> }
+      myWebComponent.setOnDragDetected { }
       myEngine = myWebComponent.engine
 
       myPane.children.add(myWebComponent)
