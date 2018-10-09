@@ -5,7 +5,7 @@ $(window).load(function () {
     $content = $header.next();
 
     $content.slideToggle(200, function () {
-      // hack to change arrow icon by adding/removing fake class. See style/base.css
+      // hack to change arrow icon by adding/removing fake class. See style/hint/base.css
       $header.toggleClass('checked');
     });
   });
