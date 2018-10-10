@@ -1,26 +1,19 @@
 package com.jetbrains.edu.learning.ui.taskDescription
 
 import com.intellij.CommonBundle
-import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.FontPreferences
 import com.intellij.openapi.fileTypes.PlainTextLanguage
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.EduLanguageDecorator
-import com.jetbrains.edu.learning.EduUtils
 import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionBundle.getFloatParameter
 import kotlinx.css.*
 import kotlinx.css.properties.lh
-import org.apache.commons.lang.text.StrSubstitutor
 import org.jetbrains.annotations.PropertyKey
-import org.jsoup.Jsoup
-import java.io.File
-import java.io.IOException
 import java.util.*
 
 
@@ -46,7 +39,7 @@ class StyleManager {
                                         resourceUrl("/style/javafxButtons/buttonsBase.css"),
                                         resourceUrl("/style/javafxButtons/buttonsDarcula.css").takeIf { UIUtil.isUnderDarcula() })
 
-  fun htmlWithResources(project: Project, taskText: String) = StyleResourcesManager(project).html(taskText)
+  fun resources(project: Project, content: String) = StyleResourcesManager.variables(project, content).plus(StyleResourcesManager.resources())
 
   private fun getScrollBarStylesheetsUrls(): List<String> {
     return listOf(resourceUrl("/style/scrollbars/base.css"),
@@ -112,22 +105,19 @@ private object TaskDescriptionBundle {
   }
 }
 
-private class StyleResourcesManager(val project: Project) {
-  private val LOG = Logger.getInstance(this::class.java)
-
-  private val SRC_ATTRIBUTE = "src"
-  private val decorator: EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
+private object StyleResourcesManager {
+  private fun decorator(project: Project): EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
     StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
 
   // update style/template.html.ft in case of modifying
-  private fun variables(taskText: String) = mapOf(
+  fun variables(project: Project, taskText: String) = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
-    "language_script" to decorator.languageScriptUrl,
+    "language_script" to decorator(project).languageScriptUrl,
     "content" to taskText,
-    "highlight_code" to highlightScript()
+    "highlight_code" to highlightScript(project)
   )
 
-  private fun resources() = mapOf(
+  fun resources() = mapOf(
     "codemirror" to resourceUrl("/code-mirror/codemirror.js"),
     "jquery" to resourceUrl("/style/hint/jquery-1.9.1.js"),
     "runmode" to resourceUrl("/code-mirror/runmode.js"),
@@ -145,38 +135,6 @@ private class StyleResourcesManager(val project: Project) {
     "stepik_link" to resourceUrl("/style/stepikLink.css"),
     "highlight_code" to resourceUrl("/code-mirror/highlightCode.js.ft")
   )
-
-  fun html(taskText: String): String {
-    val templateText = loadText("/style/template.html.ft")
-    val templateWithVariables = StrSubstitutor(variables(taskText)).replace(templateText)
-
-    val styledText = StrSubstitutor(resources()).replace(templateWithVariables)
-    return absolutizeImgPaths(styledText)
-  }
-
-  private fun absolutizeImgPaths(content: String): String {
-    val task = EduUtils.getCurrentTask(project)
-    if (task == null) {
-      return content
-    }
-
-    val taskDir = task.getTaskDir(project)
-    if (taskDir == null) {
-      return content
-    }
-
-    val document = Jsoup.parse(content)
-    val imageElements = document.getElementsByTag("img")
-    for (imageElement in imageElements) {
-      val imagePath = imageElement.attr(SRC_ATTRIBUTE)
-      if (!BrowserUtil.isAbsoluteURL(imagePath)) {
-        val file = File(imagePath)
-        val absolutePath = File(taskDir.path, file.path).toURI().toString()
-        imageElement.attr("src", absolutePath)
-      }
-    }
-    return document.outerHtml()
-  }
 
   private fun typographyAndColorStylesheet(): String {
     val styleManager = StyleManager()
@@ -208,29 +166,9 @@ private class StyleResourcesManager(val project: Project) {
     }.toString()
   }
 
-  private fun highlightScript(): String {
+  private fun highlightScript(project: Project): String {
     val loadText = loadText("/code-mirror/highlightCode.js.ft")
-    return loadText?.replace("\${default_mode}", decorator.defaultHighlightingMode) ?: ""
-  }
-
-  private fun loadText(filePath: String): String? {
-    var template: String? = null
-    val stream = this.javaClass.getResourceAsStream(filePath)
-    try {
-      template = StreamUtil.readText(stream, "utf-8")
-    }
-    catch (e: IOException) {
-      LOG.warn(e.message)
-    }
-    finally {
-      try {
-        stream.close()
-      }
-      catch (e: IOException) {
-        LOG.warn(e.message)
-      }
-    }
-    return template
+    return loadText?.replace("\${default_mode}", decorator(project).defaultHighlightingMode) ?: ""
   }
 }
 

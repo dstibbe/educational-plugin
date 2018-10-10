@@ -67,7 +67,7 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
 
   fun loadContent(content: String) {
     StudyTaskManager.getInstance(myProject).course ?: return
-    Platform.runLater { myEngine.loadContent(StyleManager().htmlWithResources(myProject, content)) }
+    Platform.runLater { myEngine.loadContent(htmlWithResources(myProject, content)) }
   }
 
   private fun initHyperlinkListener() {
@@ -174,7 +174,7 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
 
     @TestOnly
     fun processContent(content: String, project: Project): String {
-      return StyleManager().htmlWithResources(project, content)
+      return htmlWithResources(project, content)
     }
   }
 }
