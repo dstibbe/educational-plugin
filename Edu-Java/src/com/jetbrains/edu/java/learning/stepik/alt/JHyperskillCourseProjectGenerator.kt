@@ -21,7 +21,7 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
 
       val stages = HyperskillConnector.getStages(projectId) ?: return false
       val lesson = getLesson(lessonId, language, stages) ?: return false
-      lesson.name = userInfo.project?.title?.removePrefix("Project # ") // TODO: better place for prefix
+      lesson.name = userInfo.project?.title?.removePrefix(PROJECT_PREFIX)
 
       myCourse.addLesson(FrameworkLesson(lesson))
       true
