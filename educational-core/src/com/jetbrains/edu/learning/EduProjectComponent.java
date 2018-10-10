@@ -99,7 +99,7 @@ public class EduProjectComponent implements ProjectComponent {
 
         ApplicationManager.getApplication().invokeLater(() -> ApplicationManager.getApplication().runWriteAction(() -> {
             registerShortcuts();
-            EduUsagesCollector.projectTypeOpened(EduNames.STUDY);
+            EduUsagesCollector.projectTypeOpened(course.getCourseMode());
           }));
       }
     );
