@@ -15,13 +15,23 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
   override fun beforeProjectGenerated(): Boolean {
     return try {
       val language = myCourse.languageById
-      val userInfo = HyperskillSettings.INSTANCE.account?.userInfo ?: return false
-      val lessonId = userInfo.hyperskillProject?.lesson ?: return false
+      val hyperskillAccount = HyperskillSettings.INSTANCE.account
+      if (hyperskillAccount == null) {
+        LOG.error("User is not logged in to the Hyperskill")
+        return false
+      }
+      val userInfo = hyperskillAccount.userInfo
+      val hyperskillProject = userInfo.hyperskillProject
+      if (hyperskillProject == null) {
+        LOG.error("User didn't choose project on hyperskill")
+        return false
+      }
+      val lessonId = hyperskillProject.lesson
       val projectId = myCourse.id
 
       val stages = HyperskillConnector.getStages(projectId) ?: return false
       val lesson = getLesson(lessonId, language, stages) ?: return false
-      lesson.name = userInfo.hyperskillProject?.title?.removePrefix(PROJECT_PREFIX)
+      lesson.name = hyperskillProject.title.removePrefix(PROJECT_PREFIX)
 
       myCourse.addLesson(FrameworkLesson(lesson))
       true
