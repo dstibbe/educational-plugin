@@ -1,4 +1,4 @@
-package com.jetbrains.edu.learning.stepik.alt
+package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.intellij.ui.HyperlinkAdapter
 import com.jetbrains.edu.learning.settings.OauthOptions

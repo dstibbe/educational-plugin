@@ -1,4 +1,4 @@
-package com.jetbrains.edu.learning.stepik.alt
+package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -10,7 +10,7 @@ import com.jetbrains.edu.learning.actions.ImportLocalCourseAction
 import com.jetbrains.edu.learning.courseFormat.Course
 import com.jetbrains.edu.learning.courseLoading.CourseLoader
 import com.jetbrains.edu.learning.newproject.ui.BrowseCoursesDialog
-import com.jetbrains.edu.learning.stepik.alt.courseFormat.HyperskillCourse
+import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse
 
 class HyperskillProjectAction : DumbAwareAction("Start Hyperskill Project") {
   override fun actionPerformed(e: AnActionEvent) {

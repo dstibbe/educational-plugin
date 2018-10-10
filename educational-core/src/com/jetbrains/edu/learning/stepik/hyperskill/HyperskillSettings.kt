@@ -1,4 +1,4 @@
-package com.jetbrains.edu.learning.stepik.alt
+package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager

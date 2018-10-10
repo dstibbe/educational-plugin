@@ -15,8 +15,8 @@ import com.jetbrains.edu.learning.courseFormat.RemoteCourse
 import com.jetbrains.edu.learning.coursera.CourseraNames
 import com.jetbrains.edu.learning.getDisabledPlugins
 import com.jetbrains.edu.learning.stepik.StepikNames
-import com.jetbrains.edu.learning.stepik.alt.HyperskillSettings
-import com.jetbrains.edu.learning.stepik.alt.courseFormat.HyperskillCourse
+import com.jetbrains.edu.learning.stepik.hyperskill.HyperskillSettings
+import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse
 import java.awt.Color
 
 sealed class ErrorState(

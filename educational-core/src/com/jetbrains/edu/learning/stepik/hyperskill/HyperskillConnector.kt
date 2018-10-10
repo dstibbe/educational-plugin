@@ -1,4 +1,4 @@
-package com.jetbrains.edu.learning.stepik.alt
+package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.application.ApplicationManager

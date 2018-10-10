@@ -13,7 +13,7 @@ import com.jetbrains.edu.learning.handlers.EduMoveDelegate;
 import com.jetbrains.edu.learning.StudyTaskManager;
 import com.jetbrains.edu.learning.EduUtils;
 import com.jetbrains.edu.learning.courseFormat.Course;
-import com.jetbrains.edu.learning.stepik.alt.courseFormat.HyperskillCourse;
+import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

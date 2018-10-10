@@ -1,13 +1,13 @@
-package com.jetbrains.edu.java.stepik.alt
+package com.jetbrains.edu.java.stepik.hyperskill
 
 import com.intellij.openapi.diagnostic.Logger
 import com.jetbrains.edu.learning.courseFormat.Course
 import com.jetbrains.edu.learning.courseFormat.FrameworkLesson
 import com.jetbrains.edu.learning.gradle.GradleCourseBuilderBase
 import com.jetbrains.edu.learning.gradle.generation.GradleCourseProjectGenerator
-import com.jetbrains.edu.learning.stepik.alt.HyperskillConnector
-import com.jetbrains.edu.learning.stepik.alt.HyperskillSettings
-import com.jetbrains.edu.learning.stepik.alt.getLesson
+import com.jetbrains.edu.learning.stepik.hyperskill.HyperskillConnector
+import com.jetbrains.edu.learning.stepik.hyperskill.HyperskillSettings
+import com.jetbrains.edu.learning.stepik.hyperskill.getLesson
 
 class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
                                         course: Course) : GradleCourseProjectGenerator(builder, course) {
