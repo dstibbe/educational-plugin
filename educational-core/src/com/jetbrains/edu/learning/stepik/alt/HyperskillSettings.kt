@@ -32,7 +32,7 @@ class HyperskillSettings : PersistentStateComponent<Element> {
   }
 
   companion object {
-    val instance: HyperskillSettings
+    val INSTANCE: HyperskillSettings
       get() = ServiceManager.getService(HyperskillSettings::class.java)
   }
 }

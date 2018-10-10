@@ -15,7 +15,7 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
   override fun beforeProjectGenerated(): Boolean {
     return try {
       val language = myCourse.languageById
-      val userInfo = HyperskillSettings.instance.account?.userInfo ?: return false
+      val userInfo = HyperskillSettings.INSTANCE.account?.userInfo ?: return false
       val lessonId = userInfo.project?.lesson ?: return false
       val projectId = myCourse.id
 

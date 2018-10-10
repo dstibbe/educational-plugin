@@ -51,7 +51,7 @@ sealed class ErrorState(
         disabledPlugins.isNotEmpty() -> RequiredPluginsDisabled(disabledPlugins)
         course.courseType == CourseraNames.COURSE_TYPE -> None
         isCheckiOLoginRequired(course) -> CheckiOLoginRequired
-        course is HyperskillCourse -> if (HyperskillSettings.instance.account == null) HyperskillLoginRequired else None
+        course is HyperskillCourse -> if (HyperskillSettings.INSTANCE.account == null) HyperskillLoginRequired else None
         !isLoggedInToStepik() -> if (isStepikLoginRequired(course)) StepikLoginRequired else NotLoggedIn
         else -> None
       }

@@ -10,10 +10,10 @@ class HyperskillOptions : OauthOptions<HyperskillAccount>() {
     initAccounts()
   }
 
-  override fun getCurrentAccount() : HyperskillAccount? = HyperskillSettings.instance.account
+  override fun getCurrentAccount() : HyperskillAccount? = HyperskillSettings.INSTANCE.account
 
   override fun setCurrentAccount(lastSavedAccount: HyperskillAccount?) {
-    HyperskillSettings.instance.account = lastSavedAccount
+    HyperskillSettings.INSTANCE.account = lastSavedAccount
   }
 
   @Nls
