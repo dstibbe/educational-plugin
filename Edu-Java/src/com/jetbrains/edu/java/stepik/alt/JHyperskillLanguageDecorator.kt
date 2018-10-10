@@ -1,6 +1,6 @@
-package com.jetbrains.edu.java.learning.stepik.alt
+package com.jetbrains.edu.java.stepik.alt
 
-import com.jetbrains.edu.java.learning.JLanguageDecorator
+import com.jetbrains.edu.java.JLanguageDecorator
 import icons.EducationalCoreIcons
 import javax.swing.Icon
 

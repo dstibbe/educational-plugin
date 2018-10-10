@@ -1,4 +1,4 @@
-package com.jetbrains.edu.java.learning.stepik.alt
+package com.jetbrains.edu.java.stepik.alt
 
 import com.intellij.lang.DependentLanguage
 import com.intellij.lang.Language

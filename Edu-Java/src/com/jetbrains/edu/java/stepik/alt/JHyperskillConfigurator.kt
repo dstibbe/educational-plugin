@@ -1,6 +1,6 @@
-package com.jetbrains.edu.java.learning.stepik.alt
+package com.jetbrains.edu.java.stepik.alt
 
-import com.jetbrains.edu.java.learning.JTaskCheckerProvider
+import com.jetbrains.edu.java.JTaskCheckerProvider
 import com.jetbrains.edu.learning.gradle.GradleConfiguratorBase
 
 class JHyperskillConfigurator : GradleConfiguratorBase() {
