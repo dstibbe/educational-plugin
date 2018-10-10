@@ -33,7 +33,6 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
   }
 
   companion object {
-    @JvmStatic
     private val LOG = Logger.getInstance(JHyperskillCourseProjectGenerator::class.java)
   }
 }
