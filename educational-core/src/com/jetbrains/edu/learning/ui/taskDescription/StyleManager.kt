@@ -7,8 +7,10 @@ import com.intellij.openapi.editor.colors.FontPreferences
 import com.intellij.openapi.fileTypes.PlainTextLanguage
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.ui.ColorUtil
 import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.EduLanguageDecorator
+import com.jetbrains.edu.learning.EduSettings
 import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionBundle.getFloatParameter
 import kotlinx.css.*
@@ -32,6 +34,8 @@ class StyleManager {
   val exampleBackground = getCSSColor("$lafPrefix.example.background")
   val linkColor = getCSSColor("$lafPrefix.link.color")
   val bodyBackground = getCSSColor("$lafPrefix.body.background")
+  val codeBackground = if (EduSettings.getInstance().shouldUseJavaFx()) bodyBackground
+  else Color(ColorUtil.toHex(ColorUtil.dimmer(UIUtil.getPanelBackground())))
 
   val scrollBarStylesheets = getScrollBarStylesheetsUrls()
   val baseStylesheet = resourceUrl("/style/browser.css")
@@ -105,7 +109,7 @@ private object TaskDescriptionBundle {
   }
 }
 
-private object StyleResourcesManager {
+object StyleResourcesManager {
   private fun decorator(project: Project): EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
     StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
 
@@ -132,16 +136,16 @@ private object StyleResourcesManager {
       if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-darcula.css" else "/code-mirror/codemirror.css"),
     "toggle_hint_script" to resourceUrl("/style/hint/toggleHint.js"),
     "mathjax_script" to resourceUrl("/style/mathjaxConfigure.js"),
-    "stepik_link" to resourceUrl("/style/stepikLink.css"),
-    "highlight_code" to resourceUrl("/code-mirror/highlightCode.js.ft")
+    "stepik_link" to resourceUrl("/style/stepikLink.css")
   )
 
-  private fun typographyAndColorStylesheet(): String {
+  @JvmStatic
+  fun typographyAndColorStylesheet(): String {
     val styleManager = StyleManager()
     return CSSBuilder().apply {
       body {
         fontFamily = styleManager.bodyFont
-        fontSize = styleManager.bodyFontSize.px
+        fontSize = if (EduSettings.getInstance().shouldUseJavaFx()) styleManager.bodyFontSize.px else styleManager.bodyFontSize.pt
         lineHeight = styleManager.bodyLineHeight.px.lh
         color = styleManager.bodyColor
         backgroundColor = styleManager.bodyBackground
@@ -149,10 +153,11 @@ private object StyleResourcesManager {
 
       code {
         fontFamily = styleManager.codeFont
+        backgroundColor = styleManager.codeBackground
       }
 
       "pre code" {
-        fontSize = styleManager.codeFontSize.px
+        fontSize = if (EduSettings.getInstance().shouldUseJavaFx()) styleManager.codeFontSize.px else styleManager.codeFontSize.pt
         lineHeight = styleManager.codeLineHeight.px.lh
       }
 

@@ -98,7 +98,7 @@ public class SwingToolWindow extends TaskDescriptionToolWindow {
 
   public void setText(@NotNull String text) {
     String wrappedText = wrapHints(text);
-    myTaskTextPane.setText(StyledTextLoader.textWithStyles(wrappedText));
+    myTaskTextPane.setText(JavaFxTaskUtil.htmlWithResources(myProject, wrappedText));
   }
 
   @Override
