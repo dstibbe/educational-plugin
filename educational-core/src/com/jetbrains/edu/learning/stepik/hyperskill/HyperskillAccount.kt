@@ -1,6 +1,7 @@
 package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.jetbrains.edu.learning.OauthAccount
 
 class HyperskillAccount : OauthAccount<HyperskillUserInfo>()
@@ -11,7 +12,8 @@ class HyperskillUserInfo {
   var email: String = ""
   var fullname: String = ""
   var stage: HyperskillStage? = null
-  var project: HyperskillProject? = null
+  @JsonProperty("project")
+  var hyperskillProject: HyperskillProject? = null
 
   override fun toString(): String {
     return fullname

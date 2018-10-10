@@ -18,7 +18,7 @@ class HyperskillProjectAction : DumbAwareAction("Start Hyperskill Project") {
       CoursesProvider.loadAllCourses(listOf(HyperskillProjectsProvider))
     } ?: return
     val dialog = BrowseCoursesDialog(courses, DefaultActionGroup(ImportHyperskillProject()))
-    val projectId = HyperskillSettings.INSTANCE.account?.userInfo?.project?.id
+    val projectId = HyperskillSettings.INSTANCE.account?.userInfo?.hyperskillProject?.id
     val toSelect = courses.find { it.id == projectId }
     if (toSelect != null) {
       dialog.selectedCourse = toSelect

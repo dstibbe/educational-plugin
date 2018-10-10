@@ -16,12 +16,12 @@ class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
     return try {
       val language = myCourse.languageById
       val userInfo = HyperskillSettings.INSTANCE.account?.userInfo ?: return false
-      val lessonId = userInfo.project?.lesson ?: return false
+      val lessonId = userInfo.hyperskillProject?.lesson ?: return false
       val projectId = myCourse.id
 
       val stages = HyperskillConnector.getStages(projectId) ?: return false
       val lesson = getLesson(lessonId, language, stages) ?: return false
-      lesson.name = userInfo.project?.title?.removePrefix(PROJECT_PREFIX)
+      lesson.name = userInfo.hyperskillProject?.title?.removePrefix(PROJECT_PREFIX)
 
       myCourse.addLesson(FrameworkLesson(lesson))
       true
