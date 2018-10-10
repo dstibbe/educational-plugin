@@ -29,7 +29,6 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
   private lateinit var myWebComponent: WebView
   private lateinit var myPane: StackPane
   private lateinit var myEngine: WebEngine
-  private var taskDescriptionHtml: TaskDescriptionHtml? = null
 
   val engine: WebEngine
     get() = myWebComponent.engine
@@ -67,9 +66,8 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
   }
 
   fun loadContent(content: String) {
-    val course = StudyTaskManager.getInstance(myProject).course ?: return
-    taskDescriptionHtml = TaskDescriptionHtml(myProject, course, content)
-    Platform.runLater { myEngine.loadContent(taskDescriptionHtml?.html() ?: content) }
+    StudyTaskManager.getInstance(myProject).course ?: return
+    Platform.runLater { myEngine.loadContent(StyleManager().htmlWithResources(myProject, content)) }
   }
 
   private fun initHyperlinkListener() {
@@ -176,8 +174,7 @@ class BrowserWindow(private val myProject: Project, private val myLinkInNewBrows
 
     @TestOnly
     fun processContent(content: String, project: Project): String {
-      val course = StudyTaskManager.getInstance(project).course ?: return content
-      return TaskDescriptionHtml(project, course, content).html()
+      return StyleManager().htmlWithResources(project, content)
     }
   }
 }

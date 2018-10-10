@@ -1,20 +1,30 @@
 package com.jetbrains.edu.learning.ui.taskDescription
 
 import com.intellij.CommonBundle
+import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.FontPreferences
+import com.intellij.openapi.fileTypes.PlainTextLanguage
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.util.ui.UIUtil
+import com.jetbrains.edu.learning.EduLanguageDecorator
+import com.jetbrains.edu.learning.EduUtils
+import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionBundle.getFloatParameter
-import kotlinx.css.Color
+import kotlinx.css.*
+import kotlinx.css.properties.lh
+import org.apache.commons.lang.text.StrSubstitutor
 import org.jetbrains.annotations.PropertyKey
+import org.jsoup.Jsoup
+import java.io.File
+import java.io.IOException
 import java.util.*
 
 
 class StyleManager {
-  private val LOG = Logger.getInstance(this::class.java)
-
   private val lafPrefix = if (UIUtil.isUnderDarcula()) "darcula" else "light"
   private val typographyManager = TypographyManager()
 
@@ -36,6 +46,8 @@ class StyleManager {
                                         resourceUrl("/style/javafxButtons/buttonsBase.css"),
                                         resourceUrl("/style/javafxButtons/buttonsDarcula.css").takeIf { UIUtil.isUnderDarcula() })
 
+  fun htmlWithResources(project: Project, taskText: String) = StyleResourcesManager(project).html(taskText)
+
   private fun getScrollBarStylesheetsUrls(): List<String> {
     return listOf(resourceUrl("/style/scrollbars/base.css"),
                   if (SystemInfo.isWindows) resourceUrl("/style/scrollbars/winShape.css")
@@ -48,15 +60,8 @@ class StyleManager {
     return Color((TaskDescriptionBundle.message(s)))
   }
 
-  private fun resourceUrl(name: String): String {
-    val resource = object{}.javaClass.getResource(name)?.toExternalForm()
-    return if (resource != null) {
-      resource
-    }
-    else {
-      LOG.warn("Cannot find resource: $name")
-      ""
-    }
+  companion object {
+    internal val LOG = Logger.getInstance(this::class.java)
   }
 }
 
@@ -104,5 +109,138 @@ private object TaskDescriptionBundle {
       SystemInfo.isWindows -> "win.$name"
       else -> "linux.$name"
     }
+  }
+}
+
+private class StyleResourcesManager(val project: Project) {
+  private val LOG = Logger.getInstance(this::class.java)
+
+  private val SRC_ATTRIBUTE = "src"
+  private val decorator: EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
+    StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
+
+  // update style/template.html.ft in case of modifying
+  private fun variables(taskText: String) = mapOf(
+    "typography_color_style" to typographyAndColorStylesheet(),
+    "language_script" to decorator.languageScriptUrl,
+    "content" to taskText,
+    "highlight_code" to highlightScript()
+  )
+
+  private fun resources() = mapOf(
+    "codemirror" to resourceUrl("/code-mirror/codemirror.js"),
+    "jquery" to resourceUrl("/style/hint/jquery-1.9.1.js"),
+    "runmode" to resourceUrl("/code-mirror/runmode.js"),
+    "colorize" to resourceUrl("/code-mirror/colorize.js"),
+    "javascript" to resourceUrl("/code-mirror/javascript.js"),
+    "hint_base" to resourceUrl("/style/hint/base.css"),
+    "hint_laf_specific" to resourceUrl(
+      if (UIUtil.isUnderDarcula()) "/style/hint/darcula.css" else "/style/hint/light.css"),
+    "css_oldcodemirror" to resourceUrl(
+      if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-old-darcula.css" else "/code-mirror/codemirror-old.css"),
+    "css_codemirror" to resourceUrl(
+      if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-darcula.css" else "/code-mirror/codemirror.css"),
+    "toggle_hint_script" to resourceUrl("/style/hint/toggleHint.js"),
+    "mathjax_script" to resourceUrl("/style/mathjaxConfigure.js"),
+    "stepik_link" to resourceUrl("/style/stepikLink.css"),
+    "highlight_code" to resourceUrl("/code-mirror/highlightCode.js.ft")
+  )
+
+  fun html(taskText: String): String {
+    val templateText = loadText("/style/template.html.ft")
+    val templateWithVariables = StrSubstitutor(variables(taskText)).replace(templateText)
+
+    val styledText = StrSubstitutor(resources()).replace(templateWithVariables)
+    return absolutizeImgPaths(styledText)
+  }
+
+  private fun absolutizeImgPaths(content: String): String {
+    val task = EduUtils.getCurrentTask(project)
+    if (task == null) {
+      return content
+    }
+
+    val taskDir = task.getTaskDir(project)
+    if (taskDir == null) {
+      return content
+    }
+
+    val document = Jsoup.parse(content)
+    val imageElements = document.getElementsByTag("img")
+    for (imageElement in imageElements) {
+      val imagePath = imageElement.attr(SRC_ATTRIBUTE)
+      if (!BrowserUtil.isAbsoluteURL(imagePath)) {
+        val file = File(imagePath)
+        val absolutePath = File(taskDir.path, file.path).toURI().toString()
+        imageElement.attr("src", absolutePath)
+      }
+    }
+    return document.outerHtml()
+  }
+
+  private fun typographyAndColorStylesheet(): String {
+    val styleManager = StyleManager()
+    return CSSBuilder().apply {
+      body {
+        fontFamily = styleManager.bodyFont
+        fontSize = styleManager.bodyFontSize.px
+        lineHeight = styleManager.bodyLineHeight.px.lh
+        color = styleManager.bodyColor
+        backgroundColor = styleManager.bodyBackground
+      }
+
+      code {
+        fontFamily = styleManager.codeFont
+      }
+
+      "pre code" {
+        fontSize = styleManager.codeFontSize.px
+        lineHeight = styleManager.codeLineHeight.px.lh
+      }
+
+      ".example" {
+        backgroundColor = styleManager.exampleBackground
+      }
+
+      a {
+        color = styleManager.linkColor
+      }
+    }.toString()
+  }
+
+  private fun highlightScript(): String {
+    val loadText = loadText("/code-mirror/highlightCode.js.ft")
+    return loadText?.replace("\${default_mode}", decorator.defaultHighlightingMode) ?: ""
+  }
+
+  private fun loadText(filePath: String): String? {
+    var template: String? = null
+    val stream = this.javaClass.getResourceAsStream(filePath)
+    try {
+      template = StreamUtil.readText(stream, "utf-8")
+    }
+    catch (e: IOException) {
+      LOG.warn(e.message)
+    }
+    finally {
+      try {
+        stream.close()
+      }
+      catch (e: IOException) {
+        LOG.warn(e.message)
+      }
+    }
+    return template
+  }
+}
+
+private fun resourceUrl(name: String): String {
+  val resource = object {}.javaClass.getResource(name)?.toExternalForm()
+  return if (resource != null) {
+    resource
+  }
+  else {
+    StyleManager.LOG.warn("Cannot find resource: $name")
+    ""
   }
 }
