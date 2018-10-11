@@ -171,8 +171,7 @@ allprojects {
         implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
 
         compileOnly fileTree(dir: "${rootProject.buildDir}/javafx/jre/lib/ext")
-
-//        compile 'org.jetbrains:kotlin-css:1.0.0-pre.54-kotlin-1.2.70'
+        
         compile 'org.jetbrains:kotlin-css-jvm:1.0.0-pre.54-kotlin-1.2.70'
     }
 }
