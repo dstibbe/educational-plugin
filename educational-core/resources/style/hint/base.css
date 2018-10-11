@@ -25,6 +25,7 @@
     margin-left: -0.1em;
     display: inline-block;
     vertical-align: -0.15em;
+    transform: rotate(270deg);
 }
 
 .hint_header.checked:after {
