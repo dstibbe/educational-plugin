@@ -126,7 +126,7 @@ public class SwingToolWindow extends TaskDescriptionToolWindow {
   }
 
   @Override
-  protected void updateLaf(boolean isDarcula) {
+  protected void updateLaf() {
     myTaskTextPane.setBackground(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground());
   }
 
