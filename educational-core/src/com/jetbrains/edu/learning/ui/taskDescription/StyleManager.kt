@@ -113,7 +113,7 @@ object StyleResourcesManager {
   private fun decorator(project: Project): EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
     StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
 
-  // update style/template.html.ft in case of modifying
+  // update style/template.html.ft in case of changing key names
   fun variables(project: Project, taskText: String) = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
     "language_script" to decorator(project).languageScriptUrl,
@@ -121,6 +121,7 @@ object StyleResourcesManager {
     "highlight_code" to highlightScript(project)
   )
 
+  // update style/template.html.ft in case of changing key names
   fun resources() = mapOf(
     "codemirror" to resourceUrl("/code-mirror/codemirror.js"),
     "jquery" to resourceUrl("/style/hint/jquery-1.9.1.js"),
