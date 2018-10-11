@@ -20,8 +20,3 @@
     content: "\e001";
     color: #bababa;
 }
-
-.hint_header.checked:after {
-    font-family: "intellij-icon-font-darcula";
-    content: "\e001";
-}

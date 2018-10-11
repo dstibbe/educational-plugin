@@ -21,8 +21,3 @@
     color: #7F8B91;
     opacity: 0.9;
 }
-
-.hint_header.checked:after {
-    font-family: "intellij-icon-font";
-    content: "\e001";
-}
