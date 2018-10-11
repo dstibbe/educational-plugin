@@ -12,7 +12,7 @@ import java.awt.event.ItemListener
 import javax.swing.*
 import javax.swing.text.html.HTMLEditorKit
 
-private const val LEFT_INSET = 15
+private const val LEFT_INSET = 0
 private const val RIGHT_INSET = 10
 private const val TOP_INSET = 15
 private const val BOTTOM_INSET = 10
