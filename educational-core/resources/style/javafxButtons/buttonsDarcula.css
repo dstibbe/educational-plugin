@@ -22,15 +22,12 @@
     -fx-background-color: #3c3f41;
 }
 
-.radio-button .dot {
+.radio-button .dot,
+.check-box .mark {
     -fx-background-color: transparent;
 }
 
 
 .check-box .box {
     -fx-background-color: #4f5254;
-}
-
-.check-box .mark {
-    -fx-background-color: transparent;
 }
