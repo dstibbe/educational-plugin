@@ -9,6 +9,8 @@ import com.jetbrains.edu.learning.stepik.hyperskill.HyperskillConnector
 import com.jetbrains.edu.learning.stepik.hyperskill.HyperskillSettings
 import com.jetbrains.edu.learning.stepik.hyperskill.getLesson
 
+private const val PROJECT_PREFIX = "Project # "
+
 class JHyperskillCourseProjectGenerator(builder: GradleCourseBuilderBase,
                                         course: Course) : GradleCourseProjectGenerator(builder, course) {
 
