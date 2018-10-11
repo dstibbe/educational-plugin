@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.jetbrains.edu.learning.OauthAccountKt.deserializeAccount;
+import static com.jetbrains.edu.learning.authUtils.OAuthAccountKt.deserializeAccount;
 import static com.jetbrains.edu.learning.serialization.SerializationUtils.Xml.*;
 
 @State(name = "EduSettings", storages = @Storage("other.xml"))

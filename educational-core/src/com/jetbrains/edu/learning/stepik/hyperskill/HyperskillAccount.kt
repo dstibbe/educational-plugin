@@ -2,9 +2,9 @@ package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.jetbrains.edu.learning.OauthAccount
+import com.jetbrains.edu.learning.authUtils.OAuthAccount
 
-class HyperskillAccount : OauthAccount<HyperskillUserInfo>()
+class HyperskillAccount : OAuthAccount<HyperskillUserInfo>()
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class HyperskillUserInfo {

@@ -2,11 +2,11 @@ package com.jetbrains.edu.learning.stepik;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
-import com.jetbrains.edu.learning.OauthAccount;
-import com.jetbrains.edu.learning.TokenInfo;
+import com.jetbrains.edu.learning.authUtils.OAuthAccount;
+import com.jetbrains.edu.learning.authUtils.TokenInfo;
 import org.jetbrains.annotations.NotNull;
 
-public class StepicUser extends OauthAccount<StepicUserInfo> {
+public class StepicUser extends OAuthAccount<StepicUserInfo> {
   private StepicUser() { }
 
   public StepicUser(@NotNull TokenInfo tokenInfo) {

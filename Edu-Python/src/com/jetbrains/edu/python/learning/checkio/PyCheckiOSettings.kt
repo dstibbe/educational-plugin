@@ -8,7 +8,7 @@ import com.intellij.util.xmlb.XmlSerializer
 import com.intellij.util.xmlb.annotations.Transient
 import com.jetbrains.edu.learning.checkio.account.CheckiOAccount
 import com.jetbrains.edu.learning.checkio.account.CheckiOUserInfo
-import com.jetbrains.edu.learning.deserializeAccount
+import com.jetbrains.edu.learning.authUtils.deserializeAccount
 import org.jdom.Element
 
 private const val serviceName = "PyCheckiOSettings"

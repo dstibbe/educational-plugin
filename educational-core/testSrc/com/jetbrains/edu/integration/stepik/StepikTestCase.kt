@@ -3,7 +3,7 @@ package com.jetbrains.edu.integration.stepik
 import com.jetbrains.edu.learning.EduSettings
 import com.jetbrains.edu.learning.EduTestCase
 import com.jetbrains.edu.learning.StudyTaskManager
-import com.jetbrains.edu.learning.TokenInfo
+import com.jetbrains.edu.learning.authUtils.TokenInfo
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse
 import com.jetbrains.edu.learning.stepik.*
 import org.apache.http.Consts
