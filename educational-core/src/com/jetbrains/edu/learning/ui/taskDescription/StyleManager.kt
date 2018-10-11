@@ -35,7 +35,7 @@ class StyleManager {
   val linkColor = getCSSColor("$lafPrefix.link.color")
   val bodyBackground = getCSSColor("$lafPrefix.body.background")
   val codeBackground = if (EduSettings.getInstance().shouldUseJavaFx()) bodyBackground
-  else Color(ColorUtil.toHex(ColorUtil.dimmer(UIUtil.getPanelBackground())))
+  else Color("#${ColorUtil.toHex(ColorUtil.dimmer(UIUtil.getPanelBackground()))}")
 
   val scrollBarStylesheets = getScrollBarStylesheetsUrls()
   val baseStylesheet = resourceUrl("/style/browser.css")
@@ -70,7 +70,7 @@ private class TypographyManager {
   val bodyLineHeight = (bodyFontSize * lineHeightScaleFactor("body.line.height")).toInt()
   val codeLineHeight = (codeFontSize * lineHeightScaleFactor("code.line.height")).toInt()
 
-  val bodyFont = TaskDescriptionBundle.getOsDependentParameter("body.font")
+  val bodyFont = TaskDescriptionBundle.getOsDependentParameter(if (EduSettings.getInstance().shouldUseJavaFx()) "body.font" else "swing.body.font")
   val codeFont = TaskDescriptionBundle.getOsDependentParameter("code.font")
 
   private fun fontScaleFactor(parameterName: String): Float {
@@ -97,8 +97,7 @@ private object TaskDescriptionBundle {
   fun getFloatParameter(@PropertyKey(resourceBundle = BUNDLE_NAME) key: String) = TaskDescriptionBundle.message(
     if (SystemInfo.isMac) "mac.$key" else key).toFloat()
 
-  fun getOsDependentParameter(key: String) = TaskDescriptionBundle.message(
-    parameterNameWithOSPrefix(key))
+  fun getOsDependentParameter(key: String) = TaskDescriptionBundle.message(parameterNameWithOSPrefix(key))
 
   private fun parameterNameWithOSPrefix(name: String): String {
     return when {
@@ -118,7 +117,8 @@ object StyleResourcesManager {
     "typography_color_style" to typographyAndColorStylesheet(),
     "language_script" to decorator(project).languageScriptUrl,
     "content" to taskText,
-    "highlight_code" to highlightScript(project)
+    "highlight_code" to highlightScript(project),
+    "base_css" to loadText("/style/browser.css")
   )
 
   // update style/template.html.ft in case of changing key names
