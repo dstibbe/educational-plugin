@@ -119,24 +119,23 @@ class StyleResourcesManager(project: Project, taskText: String) {
     "content" to taskText,
     "highlight_code" to highlightScript(project),
     "base_css" to loadText("/style/browser.css"),
-    "codemirror" to resourceUrl("/code-mirror/codemirror.js"),
-    "jquery" to resourceUrl("/style/hint/jquery-1.9.1.js"),
-    "runmode" to resourceUrl("/code-mirror/runmode.js"),
-    "colorize" to resourceUrl("/code-mirror/colorize.js"),
-    "javascript" to resourceUrl("/code-mirror/javascript.js"),
-    "hint_base" to resourceUrl("/style/hint/base.css"),
-    "hint_laf_specific" to resourceUrl(
-      if (UIUtil.isUnderDarcula()) "/style/hint/darcula.css" else "/style/hint/light.css"),
-    "css_oldcodemirror" to resourceUrl(
-      if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-old-darcula.css" else "/code-mirror/codemirror-old.css"),
-    "css_codemirror" to resourceUrl(
-      if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-darcula.css" else "/code-mirror/codemirror.css"),
-    "toggle_hint_script" to resourceUrl("/style/hint/toggleHint.js"),
-    "mathjax_script" to resourceUrl("/style/mathjaxConfigure.js"),
-    "stepik_link" to resourceUrl("/style/stepikLink.css")
+    resourcePair("codemirror", "/code-mirror/codemirror.js"),
+    resourcePair("jquery", ("/style/hint/jquery-1.9.1.js")),
+    resourcePair("runmode", "/code-mirror/runmode.js"),
+    resourcePair("colorize", "/code-mirror/colorize.js"),
+    resourcePair("javascript", "/code-mirror/javascript.js"),
+    resourcePair("hint_base", "/style/hint/base.css"),
+    resourcePair("hint_laf_specific", if (UIUtil.isUnderDarcula()) "/style/hint/darcula.css" else "/style/hint/light.css"),
+    resourcePair("css_oldcodemirror", if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-old-darcula.css" else "/code-mirror/codemirror-old.css"),
+    resourcePair("css_codemirror", if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-darcula.css" else "/code-mirror/codemirror.css"),
+    resourcePair("toggle_hint_script", "/style/hint/toggleHint.js"),
+    resourcePair("mathjax_script", "/style/mathjaxConfigure.js"),
+    resourcePair("stepik_link", "/style/stepikLink.css")
   )
 
-  fun typographyAndColorStylesheet(): String {
+  private fun resourcePair(name: String, path: String) = name to resourceUrl(path)
+
+  private fun typographyAndColorStylesheet(): String {
     val styleManager = StyleManager()
     return CSSBuilder().apply {
       body {
