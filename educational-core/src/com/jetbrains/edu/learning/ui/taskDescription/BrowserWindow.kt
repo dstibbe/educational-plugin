@@ -8,6 +8,7 @@ import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.navigation.NavigationUtils
 import com.jetbrains.edu.learning.statistics.EduUsagesCollector
 import com.jetbrains.edu.learning.stepik.StepikNames.STEPIK_URL
+import com.jetbrains.edu.learning.ui.taskDescription.styleManagers.StyleManager
 import com.sun.webkit.dom.ElementImpl
 import javafx.application.Platform
 import javafx.concurrent.Worker

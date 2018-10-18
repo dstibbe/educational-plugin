@@ -13,6 +13,7 @@ import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.EduUtils
 import com.jetbrains.edu.learning.courseFormat.tasks.ChoiceTask
 import com.jetbrains.edu.learning.courseFormat.tasks.Task
+import com.jetbrains.edu.learning.ui.taskDescription.styleManagers.StyleManager
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Insets
