@@ -43,7 +43,7 @@ class StyleManager {
                                         resourceUrl("/style/javafxButtons/buttonsBase.css"),
                                         resourceUrl("/style/javafxButtons/buttonsDarcula.css").takeIf { UIUtil.isUnderDarcula() })
 
-  fun resources(project: Project, content: String) = StyleResourcesManager.resources(project, content)
+  fun resources(project: Project, content: String) = StyleResourcesManager(project, content).resources
 
   private fun getScrollBarStylesheetsUrls(): List<String> {
     return listOf(resourceUrl("/style/scrollbars/base.css"),
@@ -108,12 +108,12 @@ private object TaskDescriptionBundle {
   }
 }
 
-object StyleResourcesManager {
+class StyleResourcesManager(project: Project, taskText: String) {
   private fun decorator(project: Project): EduLanguageDecorator = EduLanguageDecorator.INSTANCE.forLanguage(
     StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
 
   // update style/template.html.ft in case of changing key names
-  fun resources(project: Project, taskText: String) = mapOf(
+  val resources = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
     "language_script" to decorator(project).languageScriptUrl,
     "content" to taskText,
@@ -136,7 +136,6 @@ object StyleResourcesManager {
     "stepik_link" to resourceUrl("/style/stepikLink.css")
   )
 
-  @JvmStatic
   fun typographyAndColorStylesheet(): String {
     val styleManager = StyleManager()
     return CSSBuilder().apply {
