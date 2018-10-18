@@ -43,7 +43,7 @@ class StyleManager {
                                         resourceUrl("/style/javafxButtons/buttonsBase.css"),
                                         resourceUrl("/style/javafxButtons/buttonsDarcula.css").takeIf { UIUtil.isUnderDarcula() })
 
-  fun resources(project: Project, content: String) = StyleResourcesManager.variables(project, content).plus(StyleResourcesManager.resources())
+  fun resources(project: Project, content: String) = StyleResourcesManager.resources(project, content)
 
   private fun getScrollBarStylesheetsUrls(): List<String> {
     return listOf(resourceUrl("/style/scrollbars/base.css"),
@@ -113,16 +113,12 @@ object StyleResourcesManager {
     StudyTaskManager.getInstance(project).course?.languageById ?: PlainTextLanguage.INSTANCE)
 
   // update style/template.html.ft in case of changing key names
-  fun variables(project: Project, taskText: String) = mapOf(
+  fun resources(project: Project, taskText: String) = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
     "language_script" to decorator(project).languageScriptUrl,
     "content" to taskText,
     "highlight_code" to highlightScript(project),
-    "base_css" to loadText("/style/browser.css")
-  )
-
-  // update style/template.html.ft in case of changing key names
-  fun resources() = mapOf(
+    "base_css" to loadText("/style/browser.css"),
     "codemirror" to resourceUrl("/code-mirror/codemirror.js"),
     "jquery" to resourceUrl("/style/hint/jquery-1.9.1.js"),
     "runmode" to resourceUrl("/code-mirror/runmode.js"),
