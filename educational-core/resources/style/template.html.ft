@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!--update com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionHtmle of modifying substituion keys-->
+<!-- we use key from substrings "${key}" in a StrSubstitutor as keys and in case of renaming keys one has to update map keys in
+ com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionHtml-->
 <html>
 <head>
   <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"/>
