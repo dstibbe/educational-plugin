@@ -1,3 +1,4 @@
+/*specifies the margin between two hints*/
 .hint + .hint {
     margin-top: 5px;
 }
