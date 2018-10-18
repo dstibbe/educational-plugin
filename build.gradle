@@ -172,7 +172,10 @@ allprojects {
 
         compileOnly fileTree(dir: "${rootProject.buildDir}/javafx/jre/lib/ext")
         
-        compile 'org.jetbrains:kotlin-css-jvm:1.0.0-pre.54-kotlin-1.2.70'
+        compile ('org.jetbrains:kotlin-css-jvm:1.0.0-pre.54-kotlin-1.2.70') {
+            exclude module: 'kotlin-runtime'
+            exclude module: 'kotlin-stdlib'
+        }
     }
 }
 
