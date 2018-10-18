@@ -31,7 +31,6 @@ class StyleManager {
   val codeFont = typographyManager.codeFont
 
   val bodyColor = getCSSColor("$lafPrefix.body.color")
-  val exampleBackground = getCSSColor("$lafPrefix.example.background")
   val linkColor = getCSSColor("$lafPrefix.link.color")
   val bodyBackground = getCSSColor("$lafPrefix.body.background")
   val codeBackground = if (EduSettings.getInstance().shouldUseJavaFx()) bodyBackground
@@ -154,10 +153,6 @@ class StyleResourcesManager(project: Project, taskText: String) {
       "pre code" {
         fontSize = if (EduSettings.getInstance().shouldUseJavaFx()) styleManager.codeFontSize.px else styleManager.codeFontSize.pt
         lineHeight = styleManager.codeLineHeight.px.lh
-      }
-
-      ".example" {
-        backgroundColor = styleManager.exampleBackground
       }
 
       a {
