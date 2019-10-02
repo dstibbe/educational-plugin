@@ -1,6 +1,5 @@
 package com.jetbrains.edu.coursecreator.actions.sections;
 
-import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -10,13 +9,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jetbrains.edu.coursecreator.CCUtils;
-import com.jetbrains.edu.coursecreator.configuration.YamlFormatSynchronizer;
-import com.jetbrains.edu.coursecreator.stepik.StepikCourseChangeHandler;
 import com.jetbrains.edu.learning.EduUtils;
 import com.jetbrains.edu.learning.StudyTaskManager;
 import com.jetbrains.edu.learning.courseFormat.Course;
 import com.jetbrains.edu.learning.courseFormat.Lesson;
-import com.jetbrains.edu.learning.courseFormat.Section;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,17 +53,7 @@ public class CCWrapWithSection extends DumbAwareAction {
       return;
     }
 
-    Section section = CCUtils.wrapIntoSection(project, course, lessonsToWrap, sectionName);
-    if (section == null) return;
-    YamlFormatSynchronizer.saveItem(section);
-    YamlFormatSynchronizer.saveItem(course);
-    ProjectView.getInstance(project).refresh();
-    StepikCourseChangeHandler.contentChanged(course);
-    for (Lesson lesson : section.getLessons()) {
-      if (lesson.getId() != 0) {
-        StepikCourseChangeHandler.infoChanged(lesson);
-      }
-    }
+    CCUtils.wrapIntoSection(project, course, lessonsToWrap, sectionName);
   }
 
   @NotNull

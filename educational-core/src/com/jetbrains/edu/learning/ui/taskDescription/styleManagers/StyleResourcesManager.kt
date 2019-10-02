@@ -1,36 +1,23 @@
 package com.jetbrains.edu.learning.ui.taskDescription.styleManagers
 
 import com.intellij.openapi.project.Project
-import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.EduLanguageDecorator
+import com.intellij.util.ui.UIUtil
 import com.jetbrains.edu.learning.EduSettings
-import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.ui.taskDescription.loadText
 import kotlinx.css.*
 import kotlinx.css.properties.lh
 
 internal class StyleResourcesManager(project: Project, taskText: String) {
-  private fun decorator(project: Project): EduLanguageDecorator? {
-    val language = StudyTaskManager.getInstance(project).course?.languageById
-    return language?.let { EduLanguageDecorator.INSTANCE.forLanguage(language) }
-  }
 
   // update style/template.html.ft in case of changing key names
   val resources = mapOf(
     "typography_color_style" to typographyAndColorStylesheet(),
-    "language_script" to (decorator(project)?.languageScriptUrl ?: ""),
     "content" to taskText,
-    "highlight_code" to highlightScript(project),
     "base_css" to loadText("/style/browser.css"),
-    resourcePair("codemirror", "/code-mirror/codemirror.js"),
     resourcePair("jquery", ("/style/hint/jquery-1.9.1.js")),
-    resourcePair("runmode", "/code-mirror/runmode.js"),
-    resourcePair("colorize", "/code-mirror/colorize.js"),
-    resourcePair("javascript", "/code-mirror/javascript.js"),
     resourcePair("hint_base", "/style/hint/base.css"),
-    resourcePair("hint_laf_specific", if (UIUtil.isUnderDarcula()) "/style/hint/darcula.css" else "/style/hint/light.css"),
-    resourcePair("css_oldcodemirror", if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-old-darcula.css" else "/code-mirror/codemirror-old.css"),
-    resourcePair("css_codemirror", if (UIUtil.isUnderDarcula()) "/code-mirror/codemirror-darcula.css" else "/code-mirror/codemirror.css"),
+    resourcePair("hint_laf_specific",  "/style/hint/${resourceFileName()}.css"),
     resourcePair("toggle_hint_script", "/style/hint/toggleHint.js"),
     resourcePair("mathjax_script", "/style/mathjaxConfigure.js"),
     resourcePair("stepik_link", "/style/stepikLink.css")
@@ -62,11 +49,10 @@ internal class StyleResourcesManager(project: Project, taskText: String) {
       a {
         color = styleManager.linkColor
       }
-    }.toString()
-  }
 
-  private fun highlightScript(project: Project): String {
-    val loadText = loadText("/code-mirror/highlightCode.js.ft")
-    return loadText?.replace("\${default_mode}", (decorator(project)?.defaultHighlightingMode ?: "")) ?: ""
+      "::-webkit-scrollbar-corner" {
+        backgroundColor = styleManager.bodyBackground
+      }
+    }.toString()
   }
 }

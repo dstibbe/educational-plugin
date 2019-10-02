@@ -3,8 +3,6 @@ package com.jetbrains.edu.learning;
 import com.google.common.annotations.VisibleForTesting;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.actionSystem.KeyboardShortcut;
-import com.intellij.openapi.actionSystem.Shortcut;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -12,13 +10,10 @@ import com.intellij.openapi.editor.colors.EditorColorsListener;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.keymap.Keymap;
-import com.intellij.openapi.keymap.ex.KeymapManagerEx;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -26,18 +21,17 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.WindowManager;
-import com.intellij.util.containers.hash.HashMap;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jetbrains.edu.coursecreator.CCUtils;
-import com.jetbrains.edu.learning.actions.*;
-import com.jetbrains.edu.learning.courseFormat.AnswerPlaceholder;
 import com.jetbrains.edu.learning.configuration.EduConfigurator;
+import com.jetbrains.edu.learning.courseFormat.AnswerPlaceholder;
 import com.jetbrains.edu.learning.courseFormat.Course;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
 import com.jetbrains.edu.learning.courseFormat.TaskFile;
 import com.jetbrains.edu.learning.courseFormat.ext.CourseExt;
 import com.jetbrains.edu.learning.courseFormat.ext.TaskExt;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
+import com.jetbrains.edu.learning.gradle.GradleWrapperListener;
 import com.jetbrains.edu.learning.gradle.generation.EduGradleUtils;
 import com.jetbrains.edu.learning.handlers.UserCreatedFileListener;
 import com.jetbrains.edu.learning.newproject.CourseProjectGenerator;
@@ -47,23 +41,19 @@ import com.jetbrains.edu.learning.stepik.*;
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionView;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jetbrains.edu.learning.EduUtils.*;
+import static com.jetbrains.edu.learning.gradle.GradleConstants.GRADLE_WRAPPER_UNIX;
 import static com.jetbrains.edu.learning.stepik.StepikNames.STEP_ID;
 
 @SuppressWarnings("ComponentNotRegistered") // educational-core.xml
 public class EduProjectComponent implements ProjectComponent {
   private static final Logger LOG = Logger.getInstance(EduProjectComponent.class.getName());
   private final Project myProject;
-  private final Map<Keymap, List<Pair<String, String>>> myDeletedShortcuts = new HashMap<>();
   private static final String HINTS_IN_DESCRIPTION_PROPERTY = "HINTS_IN_TASK_DESCRIPTION";
   private MessageBusConnection myBusConnection;
 
@@ -113,10 +103,8 @@ public class EduProjectComponent implements ProjectComponent {
         addStepikWidget();
         selectStep(course);
 
-        ApplicationManager.getApplication().invokeLater(() -> ApplicationManager.getApplication().runWriteAction(() -> {
-          registerShortcuts();
-          EduUsagesCollector.projectTypeOpened(course.getCourseMode());
-        }));
+        ApplicationManager.getApplication().invokeLater(
+          () -> ApplicationManager.getApplication().runWriteAction(() -> EduUsagesCollector.projectTypeOpened(course.getCourseMode())));
       }
     );
 
@@ -168,7 +156,12 @@ public class EduProjectComponent implements ProjectComponent {
     String projectBasePath = myProject.getBasePath();
     if (projectBasePath != null) {
       // Android Studio creates non executable `gradlew`
-      new File(FileUtil.toSystemDependentName(projectBasePath), "gradlew").setExecutable(true);
+      File gradlew = new File(FileUtil.toSystemDependentName(projectBasePath), GRADLE_WRAPPER_UNIX);
+      if (gradlew.exists()) {
+        gradlew.setExecutable(true);
+      } else {
+        VirtualFileManager.getInstance().addVirtualFileListener(new GradleWrapperListener(myProject), myProject);
+      }
     }
   }
 
@@ -255,55 +248,10 @@ public class EduProjectComponent implements ProjectComponent {
     }
   }
 
-  private void registerShortcuts() {
-    addShortcut(CheckAction.ACTION_ID, new String[]{CheckAction.SHORTCUT});
-    addShortcut(RevertTaskAction.ACTION_ID, new String[]{RevertTaskAction.SHORTCUT});
-    addShortcut(NextPlaceholderAction.ACTION_ID, new String[]{NextPlaceholderAction.SHORTCUT, NextPlaceholderAction.SHORTCUT2});
-    addShortcut(PrevPlaceholderAction.ACTION_ID, new String[]{PrevPlaceholderAction.SHORTCUT});
-    addShortcut(NextTaskAction.ACTION_ID, new String[]{NextTaskAction.SHORTCUT});
-    addShortcut(PreviousTaskAction.ACTION_ID, new String[]{PreviousTaskAction.SHORTCUT});
-  }
-
-  private void addShortcut(@NotNull final String actionIdString, @NotNull final String[] shortcuts) {
-    KeymapManagerEx keymapManager = KeymapManagerEx.getInstanceEx();
-    for (Keymap keymap : keymapManager.getAllKeymaps()) {
-      List<Pair<String, String>> pairs = myDeletedShortcuts.get(keymap);
-      if (pairs == null) {
-        pairs = new ArrayList<>();
-        myDeletedShortcuts.put(keymap, pairs);
-      }
-      for (String shortcutString : shortcuts) {
-        Shortcut studyActionShortcut = new KeyboardShortcut(KeyStroke.getKeyStroke(shortcutString), null);
-        String[] actionsIds = keymap.getActionIds(studyActionShortcut);
-        for (String actionId : actionsIds) {
-          pairs.add(Pair.create(actionId, shortcutString));
-          keymap.removeShortcut(actionId, studyActionShortcut);
-        }
-        keymap.addShortcut(actionIdString, studyActionShortcut);
-      }
-    }
-  }
-
-  @Override
-  public void projectClosed() {
-    final Course course = StudyTaskManager.getInstance(myProject).getCourse();
-    if (course != null) {
-      KeymapManagerEx keymapManager = KeymapManagerEx.getInstanceEx();
-      for (Keymap keymap : keymapManager.getAllKeymaps()) {
-        List<Pair<String, String>> pairs = myDeletedShortcuts.get(keymap);
-        if (pairs != null && !pairs.isEmpty()) {
-          for (Pair<String, String> actionShortcut : pairs) {
-            keymap.addShortcut(actionShortcut.first, new KeyboardShortcut(KeyStroke.getKeyStroke(actionShortcut.second), null));
-          }
-        }
-      }
-    }
-  }
-
   @Override
   public void initComponent() {
     if (!OpenApiExtKt.isUnitTestMode() && isStudentProject(myProject)) {
-      VirtualFileManager.getInstance().addVirtualFileListener(new UserCreatedFileListener(myProject));
+      VirtualFileManager.getInstance().addVirtualFileListener(new UserCreatedFileListener(myProject), myProject);
     }
   }
 

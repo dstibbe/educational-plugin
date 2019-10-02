@@ -20,6 +20,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.jetbrains.edu.coursecreator.CCUtils;
 import com.jetbrains.edu.learning.EduUtils;
 import com.jetbrains.edu.learning.checker.*;
+import com.jetbrains.edu.learning.checker.details.CheckDetailsView;
 import com.jetbrains.edu.learning.checker.remote.RemoteTaskChecker;
 import com.jetbrains.edu.learning.checker.remote.RemoteTaskCheckerManager;
 import com.jetbrains.edu.learning.configuration.EduConfigurator;
@@ -37,7 +38,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CheckAction extends DumbAwareAction {
-  public static final String SHORTCUT = "ctrl alt pressed ENTER";
   public static final String ACTION_ID = "Educational.Check";
   private static final String CHECK_TASK = "Check";
   private static final String RUN_TASK = "Run";
@@ -72,10 +72,10 @@ public class CheckAction extends DumbAwareAction {
       return;
     }
     if (DumbService.isDumb(project)) {
-      EduUtils.showBalloon("Checking is not available while indexing is in progress", MessageType.WARNING, project);
+      TaskDescriptionView.getInstance(project).showBalloon("Checking is not available while indexing is in progress", MessageType.WARNING);
       return;
     }
-    CheckUtils.hideCheckResultToolWindow(project);
+    CheckDetailsView.getInstance(project).clear();
     FileDocumentManager.getInstance().saveAllDocuments();
     Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
     if (editor == null) {
@@ -180,7 +180,9 @@ public class CheckAction extends DumbAwareAction {
       String message = myResult.getMessage();
       CheckStatus status = myResult.getStatus();
       final String details = myResult.getDetails();
-      myTask.setStatus(status);
+      if (myTask.getCourse().isStudy()) {
+        myTask.setStatus(status);
+      }
       if (status == CheckStatus.Failed) {
         if (myChecker != null) {
           myChecker.onTaskFailed(message, details);

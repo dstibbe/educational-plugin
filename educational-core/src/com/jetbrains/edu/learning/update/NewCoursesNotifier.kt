@@ -22,6 +22,8 @@ class NewCoursesNotifier(parentDisposable: Disposable) {
   private val checkRunnable = Runnable { updateCourseList().doWhenDone { queueNextCheck(checkInterval) } }
   private val checkForNotifyAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, parentDisposable)
 
+  private val invocationCounter: AtomicInteger = AtomicInteger()
+
   fun scheduleNotification() {
     ApplicationManager.getApplication().messageBus.connect().subscribe(AppLifecycleListener.TOPIC, object : AppLifecycleListener {
       override fun appFrameCreated(commandLineArgs: Array<String>?, willOpenProject: Ref<Boolean>) {
@@ -47,17 +49,22 @@ class NewCoursesNotifier(parentDisposable: Disposable) {
   private fun updateCourseList(): ActionCallback {
     val callback = ActionCallback()
 
+    val ids = EduSettings.getInstance().shownCourseIds
+
     ApplicationManager.getApplication().executeOnPooledThread {
       val courses = CoursesProvider.loadAllCourses()
 
       val updated = courses.filterIsInstance<RemoteCourse>()
-        .filter {it.updateDate.isSignificantlyAfter(Date(EduSettings.getInstance().lastTimeChecked)) }
+        .filter { it.id !in ids && it.updateDate.isSignificantlyAfter(Date(EduSettings.getInstance().lastTimeChecked)) }
       if (!updated.isEmpty()) {
         showNewCoursesNotification(updated)
+        updated.mapTo(ids) { it.id }
       }
+
+      EduSettings.getInstance().shownCourseIds = ids
       EduSettings.getInstance().lastTimeChecked = System.currentTimeMillis()
       if (isUnitTestMode) {
-        INVOCATION_COUNTER.incrementAndGet()
+        invocationCounter.incrementAndGet()
       }
       callback.setDone()
     }
@@ -72,11 +79,9 @@ class NewCoursesNotifier(parentDisposable: Disposable) {
   }
 
   @TestOnly
-  fun invocationNumber(): Int = INVOCATION_COUNTER.get()
+  fun invocationNumber(): Int = invocationCounter.get()
 
   companion object {
     private var checkInterval = DateFormatUtil.DAY
-
-    private val INVOCATION_COUNTER: AtomicInteger = AtomicInteger()
   }
 }

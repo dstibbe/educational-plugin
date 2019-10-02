@@ -233,6 +233,7 @@ open class StepikIntegrationTest : StepikTestCase() {
     }
 
     CCUtils.wrapIntoSection(project, localCourse, localCourse.lessons, "section1")
+
     CCPushCourse.doPush(project, localCourse)
 
     checkSections(localCourse)

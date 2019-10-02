@@ -3,8 +3,9 @@ package com.jetbrains.edu.coursecreator.actions.placeholder;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.command.UndoConfirmationPolicy;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import com.jetbrains.edu.learning.EduUtils;
-import com.jetbrains.edu.learning.NewPlaceholderPainter;
+import com.jetbrains.edu.learning.PlaceholderPainter;
 import com.jetbrains.edu.learning.courseFormat.AnswerPlaceholder;
 import com.jetbrains.edu.learning.courseFormat.TaskFile;
 import org.jetbrains.annotations.NotNull;
@@ -22,52 +23,44 @@ public class CCDeleteAllAnswerPlaceholdersAction extends CCAnswerPlaceholderActi
   }
 
   @Override
-  public void update(AnActionEvent e) {
+  public void update(@NotNull AnActionEvent e) {
     e.getPresentation().setEnabledAndVisible(false);
     CCState state = getState(e);
     if (state == null) return;
-    e.getPresentation().setEnabledAndVisible(true);
+    if (!state.getTaskFile().getAnswerPlaceholders().isEmpty()) {
+      e.getPresentation().setEnabledAndVisible(true);
+    }
     super.update(e);
   }
 
   @Override
   protected void performAnswerPlaceholderAction(@NotNull CCState state) {
-    List<AnswerPlaceholder> placeholders = new ArrayList<>(state.getTaskFile().getAnswerPlaceholders());
-    final ClearPlaceholders action = new ClearPlaceholders(state.getTaskFile(), placeholders, state.getEditor());
+    final ClearPlaceholders action = new ClearPlaceholders(state.getProject(), state.getTaskFile(), state.getEditor());
     EduUtils.runUndoableAction(state.getProject(), ACTION_NAME, action, UndoConfirmationPolicy.REQUEST_CONFIRMATION);
   }
 
-  private static void updateView(@NotNull final Editor editor,
-                                 @NotNull final TaskFile taskFile) {
-    EduUtils.drawAllAnswerPlaceholders(editor, taskFile);
-  }
-
   private static class ClearPlaceholders extends TaskFileUndoableAction {
+    private final Project myProject;
     private final List<AnswerPlaceholder> myPlaceholders;
-    private final Editor myEditor;
     private final TaskFile myTaskFile;
 
-    public ClearPlaceholders(TaskFile taskFile, List<AnswerPlaceholder> placeholders, Editor editor) {
+    public ClearPlaceholders(@NotNull Project project, @NotNull TaskFile taskFile, @NotNull Editor editor) {
       super(taskFile, editor);
+      myProject = project;
       myTaskFile = taskFile;
-      myPlaceholders = placeholders;
-      myEditor = editor;
+      myPlaceholders = new ArrayList<>(taskFile.getAnswerPlaceholders());
     }
 
     @Override
     public void performUndo() {
       myTaskFile.getAnswerPlaceholders().addAll(myPlaceholders);
-      updateView(myEditor, myTaskFile);
+      PlaceholderPainter.showPlaceholders(myProject, myTaskFile);
     }
 
     @Override
     public void performRedo() {
-      List<AnswerPlaceholder> placeholders = myTaskFile.getAnswerPlaceholders();
-      for (AnswerPlaceholder placeholder : placeholders) {
-        NewPlaceholderPainter.removePainter(myEditor, placeholder);
-      }
-      placeholders.clear();
-      updateView(myEditor, myTaskFile);
+      PlaceholderPainter.hidePlaceholders(myTaskFile);
+      myTaskFile.getAnswerPlaceholders().clear();
     }
 
     @Override

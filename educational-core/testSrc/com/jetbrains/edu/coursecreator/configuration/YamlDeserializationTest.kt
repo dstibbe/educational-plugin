@@ -2,6 +2,7 @@ package com.jetbrains.edu.coursecreator.configuration
 
 import com.jetbrains.edu.learning.EduTestCase
 import com.jetbrains.edu.learning.courseFormat.Course
+import com.jetbrains.edu.learning.courseFormat.FeedbackLink
 import com.jetbrains.edu.learning.courseFormat.Lesson
 import com.jetbrains.edu.learning.courseFormat.Section
 import com.jetbrains.edu.learning.courseFormat.tasks.EduTask
@@ -91,5 +92,35 @@ class YamlDeserializationTest: EduTestCase() {
     assertEquals(9, answerPlaceholder.length)
     assertEquals(3, answerPlaceholder.possibleAnswer.length)
     assertEquals("lesson1#task1#Test.java#1", answerPlaceholder.placeholderDependency.toString())
+  }
+
+  fun `test edu task without dependency`() {
+    val yamlContent = """
+    |type: edu
+    |task_files:
+    |- name: Test.java
+    |  placeholders:
+    |  - offset: 0
+    |    length: 3
+    |    placeholder_text: type here
+    |""".trimMargin("|")
+    val task = YamlFormatSynchronizer.deserializeTask(yamlContent)
+    assertTrue(task is EduTask)
+    val answerPlaceholder = task.taskFiles["Test.java"]!!.answerPlaceholders[0]
+    assertEquals(9, answerPlaceholder.length)
+    assertEquals(3, answerPlaceholder.possibleAnswer.length)
+  }
+
+  fun `test feedback link`() {
+    val yamlContent = """
+    |type: edu
+    |feedback_link: http://example.com
+    |task_files:
+    |- name: Test.java
+    |""".trimMargin("|")
+    val task = YamlFormatSynchronizer.deserializeTask(yamlContent)
+    assertTrue(task is EduTask)
+    assertEquals("http://example.com", task.feedbackLink.link)
+    assertEquals(FeedbackLink.LinkType.CUSTOM, task.feedbackLink.type)
   }
 }

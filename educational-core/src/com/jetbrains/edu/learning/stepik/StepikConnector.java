@@ -70,9 +70,6 @@ import static com.jetbrains.edu.learning.stepik.StepikWrappers.*;
 public class StepikConnector {
   private static final Logger LOG = Logger.getInstance(StepikConnector.class.getName());
 
-  private static final String NOT_VERIFIED_NOTE = "\n\nNote: We’re sorry, but this course feels a little incomplete. " +
-                                                  "If you are the owner of the course please <a href=\"mailto:Tatiana.Vasilyeva@jetbrains.com\">get in touch with us</a>, " +
-                                                  "we would like to verify this with you; we think with improvement this can be listed as a featured course in the future.";
   private static final String OPEN_PLACEHOLDER_TAG = "<placeholder>";
   private static final String CLOSE_PLACEHOLDER_TAG = "</placeholder>";
   private static final String PROMOTED_COURSES_LINK = "https://raw.githubusercontent.com/JetBrains/educational-plugin/master/featured_courses.txt";
@@ -94,13 +91,14 @@ public class StepikConnector {
     }
   };
 
-  private static final List<Integer> ourFeaturedCourses = getFeaturedCoursesIds();
+  public static final List<Integer> FEATURED_COURSES = getFeaturedCoursesIds();
+  public static final List<Integer> IN_PROGRESS_COURSES = getInProgressCoursesIds();
 
   private StepikConnector() {
   }
 
-  public static boolean enrollToCourse(final int courseId, @Nullable final StepikUser user) {
-    if (user == null) return false;
+  public static void enrollToCourse(final int courseId, @Nullable final StepikUser user) {
+    if (user == null) return;
     HttpPost post = new HttpPost(StepikNames.STEPIK_API_URL + StepikNames.ENROLLMENTS);
     try {
       final EnrollmentWrapper enrollment = new EnrollmentWrapper(String.valueOf(courseId));
@@ -108,12 +106,11 @@ public class StepikConnector {
       final CloseableHttpClient client = StepikAuthorizedClient.getHttpClient(user);
       CloseableHttpResponse response = client.execute(post);
       StatusLine line = response.getStatusLine();
-      return line.getStatusCode() == HttpStatus.SC_CREATED;
+      line.getStatusCode();
     }
     catch (IOException e) {
       LOG.warn(e.getMessage());
     }
-    return false;
   }
 
   public static boolean isEnrolledToCourse(final int courseId, @Nullable final StepikUser user) {
@@ -207,13 +204,12 @@ public class StepikConnector {
 
   private static List<RemoteCourse> getInProgressCourses(@Nullable StepikUser user) {
     List<RemoteCourse> result = ContainerUtil.newArrayList();
-    final List<Integer> inProgressCourses = getInProgressCoursesIds();
-    for (Integer courseId : inProgressCourses) {
+    for (Integer courseId : IN_PROGRESS_COURSES) {
       final RemoteCourse info = getCourseInfo(user, courseId, false);
       if (info == null) continue;
       CourseCompatibility compatibility = info.getCompatibility();
       if (compatibility == CourseCompatibility.UNSUPPORTED) continue;
-      CourseVisibility visibility = new CourseVisibility.InProgressVisibility(inProgressCourses.indexOf(info.getId()));
+      CourseVisibility visibility = new CourseVisibility.InProgressVisibility(IN_PROGRESS_COURSES.indexOf(info.getId()));
       info.setVisibility(visibility);
       result.add(info);
     }
@@ -260,7 +256,7 @@ public class StepikConnector {
   }
 
   public static int getTaskPosition(final int taskId) {
-    final String url = StepikNames.STEPS + String.valueOf(taskId);
+    final String url = StepikNames.STEPS + taskId;
     try {
       StepContainer container = StepikAuthorizedClient.getFromStepik(url, StepContainer.class);
       if (container == null) {
@@ -343,9 +339,6 @@ public class StepikConnector {
       CourseCompatibility compatibility = info.getCompatibility();
       if (compatibility == CourseCompatibility.UNSUPPORTED) continue;
 
-      if (info.isPublic() && !ourFeaturedCourses.contains(info.getId())) {
-        info.setDescription(info.getDescription() + NOT_VERIFIED_NOTE);
-      }
       info.setVisibility(getVisibility(info));
       result.add(info);
     }
@@ -355,10 +348,10 @@ public class StepikConnector {
     if (!course.isPublic()) {
       return CourseVisibility.PrivateVisibility.INSTANCE;
     }
-    if (ourFeaturedCourses.contains(course.getId())) {
-      return new CourseVisibility.FeaturedVisibility(ourFeaturedCourses.indexOf(course.getId()));
+    if (FEATURED_COURSES.contains(course.getId())) {
+      return new CourseVisibility.FeaturedVisibility(FEATURED_COURSES.indexOf(course.getId()));
     }
-    if (ourFeaturedCourses.isEmpty()) {
+    if (FEATURED_COURSES.isEmpty()) {
       return CourseVisibility.LocalVisibility.INSTANCE;
     }
     return CourseVisibility.PublicVisibility.INSTANCE;
@@ -536,7 +529,7 @@ public class StepikConnector {
   }
 
   public static List<Lesson> getLessons(RemoteCourse remoteCourse, int sectionId) throws IOException {
-    final SectionContainer sectionContainer = getFromStepik(StepikNames.SECTIONS + "/" + String.valueOf(sectionId),
+    final SectionContainer sectionContainer = getFromStepik(StepikNames.SECTIONS + "/" + sectionId,
             SectionContainer.class);
     if (sectionContainer.sections.isEmpty()) {
       return Collections.emptyList();
@@ -642,7 +635,7 @@ public class StepikConnector {
           lesson = new FrameworkLesson(lesson);
         }
       }
-      List<Task> tasks = getTasks(remoteCourse.getLanguageById(), stepIds, allStepSources);
+      List<Task> tasks = getTasks(remoteCourse.getLanguageById(), lesson, stepIds, allStepSources);
       lesson.taskList.addAll(tasks);
       lessons.add(lesson);
     }
@@ -657,13 +650,13 @@ public class StepikConnector {
   }
 
   @NotNull
-  public static List<Task> getTasks(Language language, String[] stepIds, List<StepSource> allStepSources) {
+  public static List<Task> getTasks(@NotNull Language language, @NotNull Lesson lesson, String[] stepIds, List<StepSource> allStepSources) {
     List<Task> tasks = new ArrayList<>();
     for (int i = 0; i < allStepSources.size(); i++) {
       StepSource step = allStepSources.get(i);
       Integer stepId = Integer.valueOf(stepIds[i]);
       StepikUser user = EduSettings.getInstance().getUser();
-      StepikTaskBuilder builder = new StepikTaskBuilder(language, step, stepId, user == null ? -1 : user.getId());
+      StepikTaskBuilder builder = new StepikTaskBuilder(language, lesson, step, stepId, user == null ? -1 : user.getId());
       if (builder.isSupported(step.block.name)) {
         final Task task = builder.createTask(step.block.name);
         if (task != null) {
@@ -1027,7 +1020,7 @@ public class StepikConnector {
   public static Unit getUnit(int unitId) {
     try {
       List<Unit> units =
-        getFromStepik(StepikNames.UNITS + "/" + String.valueOf(unitId), UnitContainer.class).units;
+        getFromStepik(StepikNames.UNITS + "/" + unitId, UnitContainer.class).units;
       if (!units.isEmpty()) {
         return units.get(0);
       }
@@ -1042,7 +1035,7 @@ public class StepikConnector {
   public static Section getSection(int sectionId) {
     try {
       List<Section> sections =
-        getFromStepik(StepikNames.SECTIONS + "/" + String.valueOf(sectionId), SectionContainer.class).getSections();
+        getFromStepik(StepikNames.SECTIONS + "/" + sectionId, SectionContainer.class).getSections();
       if (!sections.isEmpty()) {
         return sections.get(0);
       }
@@ -1056,7 +1049,7 @@ public class StepikConnector {
   public static Lesson getLesson(int lessonId) {
     try {
       List<Lesson> lessons =
-        getFromStepik(StepikNames.LESSONS + "/" + String.valueOf(lessonId), LessonContainer.class).lessons;
+        getFromStepik(StepikNames.LESSONS + "/" + lessonId, LessonContainer.class).lessons;
       if (!lessons.isEmpty()) {
         return lessons.get(0);
       }

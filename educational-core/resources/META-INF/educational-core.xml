@@ -1,6 +1,6 @@
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
   <depends>com.intellij.modules.lang</depends>
-  <!--<xi:include href="/META-INF/Hyperskill.xml" xpointer="xpointer(/idea-plugin/*)"/>-->
+  <xi:include href="/META-INF/Hyperskill.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
   <project-components>
     <component>
@@ -46,6 +46,7 @@
 
   <actions>
     <action id="Educational.StartCourseraAssignment" class="com.jetbrains.edu.learning.coursera.StartCourseraAssignment"/>
+    <action id="Educational.HyperskillProjectAction" class="com.jetbrains.edu.learning.stepik.hyperskill.HyperskillProjectAction"/>
     <action id="Educational.ImportCourseraAssignment" class="com.jetbrains.edu.learning.coursera.ImportCourseraAssignment"/>
     <action id="Educational.ImportLocalCourse" class="com.jetbrains.edu.learning.actions.ImportLocalCourseAction"/>
     <action id="Educational.StartStepikCourse" class="com.jetbrains.edu.learning.stepik.actions.StartStepikCourseAction"/>
@@ -176,6 +177,7 @@
     <group id="Educational.LearnAndTeachFileMenu" class="com.jetbrains.edu.learning.newproject.LearnAndTeachFileMenuGroup" popup="true">
       <reference id="Educational.BrowseCourses"/>
       <reference id="Educational.StartCourseraAssignment"/>
+      <reference id="Educational.HyperskillProjectAction"/>
       <reference id="Educational.ImportLocalCourse"/>
       <reference id="Educational.StartStepikCourse"/>
       <reference id="Educational.Educator.NewCourse"/>
@@ -187,17 +189,20 @@
     <projectService serviceInterface="com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionView"
                     serviceImplementation="com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionViewImpl"
                     testServiceImplementation="com.jetbrains.edu.learning.ui.taskDescription.MockTaskDescriptionView"/>
+    <projectService serviceInterface="com.jetbrains.edu.learning.checker.details.CheckDetailsView"
+                    serviceImplementation="com.jetbrains.edu.learning.checker.details.CheckDetailsViewImpl"
+                    testServiceImplementation="com.jetbrains.edu.learning.checker.details.MockCheckDetailsView"/>
     <projectService serviceInterface="com.intellij.codeInsight.documentation.DocumentationManager"
                     serviceImplementation="com.jetbrains.edu.learning.EduDocumentationManager" overrides="true"/>
     <projectConfigurable groupId="tools" instance="com.jetbrains.edu.learning.settings.EduConfigurable"
                          id="Educational" displayName="Education"/>
 
-    <toolWindow id="Task Description" anchor="right"
+    <toolWindow id="Task" anchor="right"
                 factoryClass="com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionToolWindowFactory"
                 conditionClass="com.jetbrains.edu.learning.ui.taskDescription.EduCondition"/>
-    <toolWindow id="Educational.Output" anchor="bottom"
-                factoryClass="com.jetbrains.edu.learning.ui.OutputToolWindowFactory"
-                conditionClass="com.jetbrains.edu.learning.ui.OutputToolWindowCondition"/>
+    <toolWindow id="Educational.CheckDetails" anchor="bottom" canCloseContents="true"
+                factoryClass="com.jetbrains.edu.learning.checker.details.CheckDetailsToolWindowFactory"
+                conditionClass="com.jetbrains.edu.learning.checker.details.CheckDetailsToolWindowCondition"/>
     <fileEditorProvider implementation="com.jetbrains.edu.learning.editor.EduFileEditorProvider"/>
     <!-- should be last, otherwise project tree will be changed with GradleTreeStructureProvider -->
     <highlightErrorFilter implementation="com.jetbrains.edu.learning.editor.EduHighlightErrorFilter"/>
@@ -249,11 +254,11 @@
     <experimentalFeature id="edu.course.creator.yaml" percentOfUsers="0">
       <description>Enables yaml config files in course creation projects</description>
     </experimentalFeature>
-    <experimentalFeature id="edu.course.creator.event.based.update" percentOfUsers="0">
-      <description>Enables event-based update for Stepik courses</description>
-    </experimentalFeature>
     <experimentalFeature id="edu.course.creator.split.editor" percentOfUsers="100" internalFeature="true">
       <description>Enables previous task view for framework lessons</description>
+    </experimentalFeature>
+    <experimentalFeature id="edu.course.hyperskill" percentOfUsers="100" internalFeature="true">
+      <description>Enables project-based learning with Hyperskill</description>
     </experimentalFeature>
   </extensions>
 

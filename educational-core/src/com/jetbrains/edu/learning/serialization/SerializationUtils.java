@@ -1,5 +1,6 @@
 package com.jetbrains.edu.learning.serialization;
 
+import com.google.common.collect.Lists;
 import com.google.gson.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -8,6 +9,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.hash.HashMap;
 import com.jetbrains.edu.learning.EduNames;
 import com.jetbrains.edu.learning.EduVersions;
+import com.jetbrains.edu.learning.authUtils.TokenInfo;
+import com.jetbrains.edu.learning.checkio.courseFormat.CheckiOCourse;
 import com.jetbrains.edu.learning.courseFormat.*;
 import com.jetbrains.edu.learning.courseFormat.tasks.*;
 import com.jetbrains.edu.learning.serialization.converter.json.JsonLocalCourseConverter;
@@ -15,6 +18,7 @@ import com.jetbrains.edu.learning.serialization.converter.json.local.To8VersionL
 import com.jetbrains.edu.learning.serialization.converter.json.local.ToSeventhVersionLocalCourseConverter;
 import com.jetbrains.edu.learning.serialization.converter.xml.*;
 import com.jetbrains.edu.learning.stepik.StepikNames;
+import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
@@ -50,6 +54,9 @@ public class SerializationUtils {
   }
 
   public static class Xml {
+    public static final List<Class<? extends Course>> COURSE_ELEMENT_TYPES = Lists.newArrayList(RemoteCourse.class, CheckiOCourse.class,
+                                                                                                HyperskillCourse.class, Course.class);
+
     public final static String COURSE_ELEMENT = "courseElement";
     public final static String MAIN_ELEMENT = "StudyTaskManager";
     public final static String REMOTE_COURSE = "RemoteCourse";
@@ -384,14 +391,14 @@ public class SerializationUtils {
     @NotNull
     public static Element getCourseElement(@NotNull Element taskManagerElement) throws StudyUnrecognizedFormatException {
       Element courseHolder = getChildWithName(taskManagerElement, COURSE);
-      Element courseElement = courseHolder.getChild(COURSE_TITLED);
-      if (courseElement == null) {
-        courseElement = courseHolder.getChild(REMOTE_COURSE);
-        if (courseElement == null) {
-          throw new StudyUnrecognizedFormatException();
+      for (Class<? extends Course> elementType : COURSE_ELEMENT_TYPES) {
+        Element courseElement = courseHolder.getChild(elementType.getSimpleName());
+        if (courseElement != null) {
+          return courseElement;
         }
       }
-      return courseElement;
+      throw new StudyUnrecognizedFormatException("Failed to find course element type. CourseHolder is:\n" +
+                                                 new XMLOutputter().outputString(courseHolder));
     }
   }
 
@@ -577,6 +584,26 @@ public class SerializationUtils {
       }
       LOG.warn("No task type found in json " + json.toString());
       return null;
+    }
+  }
+
+  public static class TokenInfoDeserializer implements JsonDeserializer<TokenInfo> {
+
+    @Override
+    public TokenInfo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+      final JsonObject jsonObject = json.getAsJsonObject();
+
+      final String accessToken = jsonObject.get("access_token").getAsString();
+      // we don't have refresh token in tests
+      final String refreshToken = jsonObject.get("refresh_token") == null ? "" : jsonObject.get("refresh_token").getAsString();
+      final long expiresIn = jsonObject.get("expires_in").getAsLong();
+      final long expiringTime = expiresIn + (System.currentTimeMillis() / 1000);
+
+      TokenInfo tokenInfo = new TokenInfo();
+      tokenInfo.setRefreshToken(refreshToken);
+      tokenInfo.setAccessToken(accessToken);
+      tokenInfo.setExpiresIn(expiringTime);
+      return tokenInfo;
     }
   }
 }

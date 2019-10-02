@@ -19,7 +19,7 @@ public class PyCheckiOOAuthBundle {
   private static Reference<ResourceBundle> ourBundle;
 
   @NonNls
-  private static final String BUNDLE = "checkio.checkio-oauth";
+  private static final String BUNDLE = "checkio.py-checkio-oauth";
 
   @NotNull
   private static ResourceBundle getBundle() {

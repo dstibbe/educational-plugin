@@ -1,29 +1,24 @@
 package com.jetbrains.edu.learning.newproject.ui
 
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.ui.DialogWrapper
 import com.jetbrains.edu.learning.courseFormat.Course
-import com.jetbrains.edu.learning.newproject.OpenCourseAction
 import javax.swing.JComponent
 
-class BrowseCoursesDialog(val courses: List<Course>, customToolbarActions: DefaultActionGroup? = null) : DialogWrapper(true) {
-
+class BrowseCoursesDialog(val courses: List<Course>, customToolbarActions: DefaultActionGroup? = null) : OpenCourseDialogBase() {
   val panel = CoursesPanel(courses, customToolbarActions)
 
   init {
     title = "Select Course"
-    myOKAction = OpenCourseAction(this)
     init()
     panel.addCourseValidationListener(this::setOKActionEnabled)
   }
 
+  override val courseInfo: CourseInfo
+    get() = CourseInfo(panel.selectedCourse, panel.locationString, panel.projectSettings)
+
   override fun createCenterPanel(): JComponent = panel
 
-  var selectedCourse: Course
-    get() = panel.selectedCourse
-    set(value) {
-      panel.selectedCourse = value
-    }
-  val projectSettings: Any get() = panel.projectSettings
-  val locationString: String get() = panel.locationString
+  override fun setError(error: ErrorState) {
+    panel.updateErrorInfo(error)
+  }
 }

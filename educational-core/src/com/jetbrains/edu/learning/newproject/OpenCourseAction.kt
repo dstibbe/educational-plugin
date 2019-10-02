@@ -5,37 +5,42 @@ import com.intellij.openapi.ui.OptionAction
 import com.jetbrains.edu.coursecreator.CCUtils
 import com.jetbrains.edu.coursecreator.actions.CCPluginToggleAction
 import com.jetbrains.edu.learning.EduNames
+import com.jetbrains.edu.learning.configuration.CourseCantBeStartedException
 import com.jetbrains.edu.learning.courseFormat.ext.configurator
-import com.jetbrains.edu.learning.newproject.ui.BrowseCoursesDialog
+import com.jetbrains.edu.learning.newproject.ui.OpenCourseDialogBase
 import java.awt.event.ActionEvent
 import javax.swing.AbstractAction
 import javax.swing.Action
 
 abstract class OpenCourseActionBase(
   name: String,
-  private val dialog: BrowseCoursesDialog,
+  private val dialog: OpenCourseDialogBase,
   private val courseMode: String
 ) : AbstractAction(name) {
 
   override fun actionPerformed(e: ActionEvent) {
-    val course = dialog.selectedCourse
-    val projectSettings = dialog.projectSettings
-    val location = dialog.locationString
-    dialog.close(DialogWrapper.OK_EXIT_CODE)
-    val configurator = course.configurator
+    val (course, location, projectSettings) = dialog.courseInfo
+    val configurator = course?.configurator
     if (configurator != null) {
-      course.courseMode = courseMode
-      val projectGenerator = configurator
-        .courseBuilder
-        .getCourseProjectGenerator(course)
-      projectGenerator?.doCreateCourseProject(location, projectSettings)
+      try {
+        configurator.beforeCourseStarted(course)
+        dialog.close(DialogWrapper.OK_EXIT_CODE)
+        course.courseMode = courseMode
+        val projectGenerator = configurator
+          .courseBuilder
+          .getCourseProjectGenerator(course)
+        projectGenerator?.doCreateCourseProject(location, projectSettings)
+      }
+      catch (e: CourseCantBeStartedException) {
+        dialog.setError(e.error)
+      }
     }
   }
 }
 
-class ViewAsEducatorAction(dialog: BrowseCoursesDialog) : OpenCourseActionBase("View as Educator", dialog, CCUtils.COURSE_MODE)
+class ViewAsEducatorAction(dialog: OpenCourseDialogBase) : OpenCourseActionBase("View as Educator", dialog, CCUtils.COURSE_MODE)
 
-class OpenCourseAction(dialog: BrowseCoursesDialog) : OpenCourseActionBase("Join", dialog, EduNames.STUDY), OptionAction {
+class OpenCourseAction(dialog: OpenCourseDialogBase) : OpenCourseActionBase("Join", dialog, EduNames.STUDY), OptionAction {
 
   private val viewAsEducatorAction: ViewAsEducatorAction? = if (CCPluginToggleAction.isCourseCreatorFeaturesEnabled) {
     ViewAsEducatorAction(dialog)

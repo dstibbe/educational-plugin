@@ -3,9 +3,14 @@ package com.jetbrains.edu.learning.stepik.hyperskill
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.application.Experiments
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.jetbrains.edu.learning.EduExperimentalFeatures
 import com.jetbrains.edu.learning.EduNames
 import com.jetbrains.edu.learning.newproject.ui.JoinCourseDialog
 import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse
@@ -14,23 +19,33 @@ import java.awt.event.ActionListener
 import javax.swing.JComponent
 
 class HyperskillProjectAction : DumbAwareAction("Start Hyperskill Project") {
+
+  override fun update(e: AnActionEvent) {
+    super.update(e)
+    e.presentation.isEnabledAndVisible = Experiments.isFeatureEnabled(EduExperimentalFeatures.HYPERSKILL)
+  }
+
   override fun actionPerformed(e: AnActionEvent) {
     val account = HyperskillSettings.INSTANCE.account
     if (account == null) {
       showBalloon(e, "Please, <a href=\"\">login to Hyperskill</a> and select project.", true)
     }
     else {
-      val currentUser = HyperskillConnector.getCurrentUser()
-      if (currentUser != null) {
-        account.userInfo = currentUser
-      }
+      ProgressManager.getInstance().run(object : Task.Modal(null, "Loading Selected Project", false) {
+        override fun run(indicator: ProgressIndicator) {
+          val currentUser = HyperskillConnector.getCurrentUser()
+          if (currentUser != null) {
+            account.userInfo = currentUser
+          }
+        }
+      })
 
       val hyperskillProject = account.userInfo.hyperskillProject
       if (hyperskillProject == null) {
         showBalloon(e, "Please, <a href=\"$HYPERSKILL_PROJECTS_URL\">select project</a> ", false)
       }
       else {
-        val languageId = HYPERSKILL + "-" + EduNames.JAVA
+        val languageId = EduNames.JAVA
         val hyperskillCourse = HyperskillCourse(hyperskillProject.title, languageId)
         hyperskillCourse.courseType = HYPERSKILL
         val dialog = JoinCourseDialog(hyperskillCourse)
@@ -46,6 +61,7 @@ class HyperskillProjectAction : DumbAwareAction("Start Hyperskill Project") {
     builder.setClickHandler(HSHyperlinkListener(authorize), true)
     val balloon = builder.createBalloon()
 
+    // TODO: wrong balloon position calling action from File menu
     val component = e.getData(PlatformDataKeys.CONTEXT_COMPONENT)
     if (component is JComponent) {
       balloon.showInCenterOf(component)

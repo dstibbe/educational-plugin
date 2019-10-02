@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.DocumentUtil;
 import com.jetbrains.edu.learning.EduUtils;
-import com.jetbrains.edu.learning.NewPlaceholderPainter;
+import com.jetbrains.edu.learning.PlaceholderPainter;
 import com.jetbrains.edu.learning.courseFormat.AnswerPlaceholder;
 import com.jetbrains.edu.learning.courseFormat.TaskFile;
 import org.jetbrains.annotations.NotNull;
@@ -68,15 +68,18 @@ public class CCAddAnswerPlaceholder extends CCAnswerPlaceholderAction {
     }
 
     answerPlaceholder.setPossibleAnswer(model.hasSelection() ? model.getSelectedText() : defaultPlaceholderText);
-    AddAction action = new AddAction(answerPlaceholder, taskFile, editor);
+    AddAction action = new AddAction(project, answerPlaceholder, taskFile, editor);
     EduUtils.runUndoableAction(project, "Add Answer Placeholder", action);
   }
 
   static class AddAction extends TaskFileUndoableAction {
     private final AnswerPlaceholder myPlaceholder;
+    private final Project myProject;
 
-    public AddAction(AnswerPlaceholder placeholder, TaskFile taskFile, Editor editor) {
+    public AddAction(@NotNull Project project, @NotNull AnswerPlaceholder placeholder,
+                     @NotNull TaskFile taskFile, @NotNull Editor editor) {
       super(taskFile, editor);
+      myProject = project;
       myPlaceholder = placeholder;
     }
 
@@ -85,14 +88,14 @@ public class CCAddAnswerPlaceholder extends CCAnswerPlaceholderAction {
       final List<AnswerPlaceholder> answerPlaceholders = getTaskFile().getAnswerPlaceholders();
       if (answerPlaceholders.contains(myPlaceholder)) {
         answerPlaceholders.remove(myPlaceholder);
-        NewPlaceholderPainter.removePainter(getEditor(), myPlaceholder);
+        PlaceholderPainter.hidePlaceholder(myPlaceholder);
       }
     }
 
     @Override
     public void performRedo(){
       getTaskFile().addAnswerPlaceholder(myPlaceholder);
-      NewPlaceholderPainter.paintPlaceholder(getEditor(), myPlaceholder);
+      PlaceholderPainter.showPlaceholder(myProject, myPlaceholder);
     }
   }
 
@@ -133,6 +136,6 @@ public class CCAddAnswerPlaceholder extends CCAnswerPlaceholderAction {
 
   protected CCCreateAnswerPlaceholderDialog createDialog(Project project, AnswerPlaceholder answerPlaceholder) {
     String answerPlaceholderText = StringUtil.notNullize(answerPlaceholder.getPlaceholderText());
-    return new CCCreateAnswerPlaceholderDialog(project, answerPlaceholderText.isEmpty() ? "type here" : answerPlaceholderText);
+    return new CCCreateAnswerPlaceholderDialog(project, answerPlaceholderText.isEmpty() ? "type here" : answerPlaceholderText, false);
   }
 }

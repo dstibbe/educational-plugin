@@ -5,6 +5,7 @@ import com.intellij.openapi.util.ActionCallback
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.util.text.DateFormatUtil
 import com.jetbrains.edu.learning.CoursesProvider
+import com.jetbrains.edu.learning.EduSettings
 import com.jetbrains.edu.learning.EduTestCase
 import com.jetbrains.edu.learning.checkIsBackgroundThread
 import com.jetbrains.edu.learning.courseFormat.Course
@@ -13,6 +14,11 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class NewCoursesNotifierTest : EduTestCase() {
+
+  override fun setUp() {
+    super.setUp()
+    EduSettings.getInstance().init()
+  }
 
   fun `test notification is shown`() {
     val course = createCourse(0)
@@ -34,6 +40,20 @@ class NewCoursesNotifierTest : EduTestCase() {
     }
   }
 
+  fun `test do not show notification about same course twice`() {
+    val firstCourse = createCourse(0)
+    val secondCourse = createCourse(1)
+    val thirdCourse = createCourse(0)
+
+    doTest(2, listOf(firstCourse, secondCourse)) {
+      when (it) {
+        0 -> listOf(firstCourse)
+        1 -> listOf(secondCourse, thirdCourse)
+        else -> emptyList()
+      }
+    }
+  }
+
   private fun doTest(expectedCheckNumber: Int, expectedCourses: List<RemoteCourse>, courseProducer: (Int) -> List<RemoteCourse>) {
     val newCoursesNotifier = NewCoursesNotifier(testRootDisposable)
     PlatformTestUtil.registerExtension(CoursesProvider.EP_NAME, TestCoursesProvider(courseProducer), testRootDisposable)
@@ -50,6 +70,8 @@ class NewCoursesNotifierTest : EduTestCase() {
         newCoursesNotifier.scheduleNotificationInternal()
         actionCallback
       }
+      Thread.sleep(500)
+      assertEquals(newCoursesNotifier.invocationNumber(), 0)
 
       Thread.sleep((1 + expectedCheckNumber) * DateFormatUtil.SECOND)
 

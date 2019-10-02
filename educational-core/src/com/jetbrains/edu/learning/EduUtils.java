@@ -22,7 +22,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
-import com.intellij.openapi.editor.actionSystem.EditorActionManager;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -36,11 +35,6 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.startup.StartupManager;
-import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.ui.popup.Balloon;
-import com.intellij.openapi.ui.popup.BalloonBuilder;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
@@ -53,7 +47,6 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.PlatformUtils;
 import com.intellij.util.TimeoutUtil;
 import com.intellij.util.io.zip.JBZipEntry;
@@ -65,7 +58,6 @@ import com.jetbrains.edu.learning.courseFormat.*;
 import com.jetbrains.edu.learning.courseFormat.ext.CourseExt;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.editor.EduEditor;
-import com.jetbrains.edu.learning.handlers.AnswerPlaceholderDeleteHandler;
 import com.jetbrains.edu.learning.newproject.CourseProjectGenerator;
 import com.jetbrains.edu.learning.projectView.CourseViewPane;
 import com.jetbrains.edu.learning.serialization.SerializationUtils;
@@ -88,10 +80,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.SystemIndependent;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.io.*;
 import java.net.URI;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -201,25 +191,6 @@ public class EduUtils {
     }
   }
 
-  public static void showBalloon(String text, MessageType messageType, @NotNull final Project project) {
-    BalloonBuilder balloonBuilder =
-      JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(text, messageType, null);
-    final Balloon balloon = balloonBuilder.createBalloon();
-    final EduEditor eduEditor = getSelectedEduEditor(project);
-    Editor editor = eduEditor != null ? eduEditor.getEditor() : FileEditorManager.getInstance(project).getSelectedTextEditor();
-    assert editor != null;
-    balloon.show(computeLocation(editor), Balloon.Position.above);
-    Disposer.register(project, balloon);
-  }
-
-  // TODO: choose better position for popup since we redesigned task description panel
-  public static RelativePoint computeLocation(Editor editor) {
-    final Rectangle visibleRect = editor.getComponent().getVisibleRect();
-    Point point = new Point(visibleRect.x + visibleRect.width + 10,
-                            visibleRect.y + 10);
-    return new RelativePoint(editor.getComponent(), point);
-  }
-
   /**
    * @return true, if file doesn't belong to task (in term of course structure)
    * but can be added to it as task, test or additional file.
@@ -283,19 +254,6 @@ public class EduUtils {
   public static TaskFile getTaskFile(@NotNull final Project project, @NotNull final VirtualFile file) {
     Task task = getTaskForFile(project, file);
     return task == null ? null : task.getTaskFile(pathRelativeToTask(project, file));
-  }
-
-  public static void drawAllAnswerPlaceholders(Editor editor, TaskFile taskFile) {
-    final Project project = editor.getProject();
-    if (project == null) return;
-    if (!taskFile.isValid(editor.getDocument().getText())) return;
-    for (AnswerPlaceholder answerPlaceholder : taskFile.getAnswerPlaceholders()) {
-      NewPlaceholderPainter.paintPlaceholder(editor, answerPlaceholder);
-    }
-
-    final Document document = editor.getDocument();
-    EditorActionManager.getInstance()
-      .setReadonlyFragmentModificationHandler(document, new AnswerPlaceholderDeleteHandler(editor));
   }
 
   @Nullable
@@ -534,9 +492,6 @@ public class EduUtils {
   public static String convertToHtml(@Nullable final String content, @NotNull VirtualFile virtualFile) {
     if (content == null) return null;
 
-    if (isHtml(content)) {
-      return content;
-    }
     return generateMarkdownHtml(virtualFile, content);
   }
 
@@ -550,12 +505,6 @@ public class EduUtils {
       flavour.createHtmlGeneratingProviders(LinkMap.Builder.buildLinkMap(parsedTree, text), baseUri);
 
     return new HtmlGenerator(text, parsedTree, htmlGeneratingProviders, true).generateHtml();
-  }
-
-  private static boolean isHtml(@NotNull String content) {
-    return (content.contains("<h") && content.contains("</h")) ||
-           ((content.contains("<code>") || content.contains("<code ")) && content.contains("</code>") ||
-            content.contains("<b>") || content.contains("<p>") || content.contains("<div>") || content.contains("<br"));
   }
 
   public static boolean isTaskDescriptionFile(@NotNull final String fileName) {

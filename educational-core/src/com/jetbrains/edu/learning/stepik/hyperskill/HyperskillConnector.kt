@@ -2,19 +2,44 @@ package com.jetbrains.edu.learning.stepik.hyperskill
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
+import com.jetbrains.edu.learning.stepik.hyperskill.courseFormat.HyperskillCourse
+import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionView
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object HyperskillConnector {
+  private val LOG = Logger.getInstance(HyperskillConnector::class.java)
+
   private var authorizationBusConnection = ApplicationManager.getApplication().messageBus.connect()
   private val authorizationTopic = com.intellij.util.messages.Topic.create<HyperskillLoggedIn>("Edu.hyperskillLoggedIn",
                                                                                                HyperskillLoggedIn::class.java)
 
+  private val authorizationService: HyperskillService
+    get() {
+      val retrofit = Retrofit.Builder()
+        .baseUrl(HYPERSKILL_URL)
+        .addConverterFactory(JacksonConverterFactory.create())
+        .build()
+
+      return retrofit.create(HyperskillService::class.java)
+    }
+
   private val service: HyperskillService
     get() {
+      val account = HyperskillSettings.INSTANCE.account
+      if (account != null && !account.tokenInfo.isUpToDate()) {
+        account.refreshTokens()
+      }
+
       val dispatcher = Dispatcher()
       dispatcher.maxRequests = 10
 
@@ -22,7 +47,7 @@ object HyperskillConnector {
         .readTimeout(60, TimeUnit.SECONDS)
         .connectTimeout(60, TimeUnit.SECONDS)
         .addInterceptor { chain ->
-          val tokenInfo = HyperskillSettings.INSTANCE.account?.tokenInfo
+          val tokenInfo = account?.tokenInfo
           if (tokenInfo == null) return@addInterceptor chain.proceed(chain.request())
 
           val newRequest = chain.request().newBuilder()
@@ -47,13 +72,21 @@ object HyperskillConnector {
   }
 
   fun login(code: String): Boolean {
-    val tokenInfo = service.getTokens(CLIENT_ID, REDIRECT_URI, code, "authorization_code").execute().body() ?: return false
+    val tokenInfo = authorizationService.getTokens(CLIENT_ID, REDIRECT_URI, code, "authorization_code").execute().body() ?: return false
     HyperskillSettings.INSTANCE.account = HyperskillAccount()
     HyperskillSettings.INSTANCE.account!!.tokenInfo = tokenInfo
     val currentUser = getCurrentUser() ?: return false
     HyperskillSettings.INSTANCE.account!!.userInfo = currentUser
     ApplicationManager.getApplication().messageBus.syncPublisher<HyperskillLoggedIn>(authorizationTopic).userLoggedIn()
     return true
+  }
+
+  private fun HyperskillAccount.refreshTokens() {
+    val refreshToken = tokenInfo.refreshToken
+    val tokens = authorizationService.refreshTokens("refresh_token", CLIENT_ID, refreshToken).execute().body()
+    if (tokens != null) {
+      updateTokens(tokens)
+    }
   }
 
   fun getCurrentUser(): HyperskillUserInfo? {
@@ -64,8 +97,25 @@ object HyperskillConnector {
     return service.stages(projectId).execute().body()?.stages
   }
 
-  fun getProjects(): List<HyperskillProject>? {
-    return service.projects().execute().body()?.projects
+  fun fillTopics(course: HyperskillCourse, project: Project) {
+    for ((taskIndex, stage) in course.stages.withIndex()) {
+      val call = service.topics(stage.id)
+      call.enqueue(object: Callback<TopicsData> {
+        override fun onFailure(call: Call<TopicsData>, t: Throwable) {
+          LOG.warn("Failed to get topics for stage ${stage.id}")
+        }
+
+        override fun onResponse(call: Call<TopicsData>, response: Response<TopicsData>) {
+          val topics = response.body()?.topics?.filter { it.children.isEmpty() }
+          if (topics != null && topics.isNotEmpty()) {
+            course.taskToTopics[taskIndex] = topics
+            runInEdt {
+              TaskDescriptionView.getInstance(project).updateAdditionalTaskTab()
+            }
+          }
+        }
+      })
+    }
   }
 
   private fun createAuthorizationListener(vararg postLoginActions: Runnable) {

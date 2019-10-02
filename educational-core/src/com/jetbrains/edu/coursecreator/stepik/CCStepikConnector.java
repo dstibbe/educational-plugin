@@ -1,6 +1,5 @@
 package com.jetbrains.edu.coursecreator.stepik;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
 import com.intellij.ide.BrowserUtil;
@@ -88,7 +87,6 @@ public class CCStepikConnector {
     });
   }
 
-  @VisibleForTesting
   public static void postCourse(@NotNull final Project project, @NotNull Course course) {
     if (!checkIfAuthorized(project, "post course")) return;
 
@@ -151,7 +149,6 @@ public class CCStepikConnector {
       }
 
       postAdditionalFiles(course, project, courseOnRemote.getId(), sectionCount + 1);
-      courseOnRemote.init(null, null, true);
       StudyTaskManager.getInstance(project).setCourse(courseOnRemote);
       courseOnRemote.init(null, null, true);
       StepikUpdateDateExt.setUpdated(courseOnRemote);
